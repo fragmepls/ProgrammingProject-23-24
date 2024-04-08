@@ -1,3 +1,4 @@
+package it.scheduleplanner.export;
 import java.util.ArrayList;
 
 public interface Day {
@@ -21,7 +22,7 @@ public interface Day {
 	 * @param begin Determines the begin of the shift
 	 * @param end Determines the end of the shift
 	 */
-	public void addEmployee(Employee employee, int begin, int end);
+	// public void addEmployee(Employee employee, int begin, int end);
 	
 	/**
 	 * Returns ArrayList of the assigned employees with parameters: [Employee employee, Shift shift / shift begin*, shift end**]<br/>

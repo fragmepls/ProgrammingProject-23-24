@@ -1,3 +1,4 @@
+package it.scheduleplanner.export;
 import java.util.ArrayList;
 
 public class WorkDay implements Day{
@@ -25,10 +26,10 @@ public class WorkDay implements Day{
 	 * @param employee Employee to add to the Work Day
 	 * @param shift To select from enum Shift, determines the shift
 	 */
-	public void addEmployee(Employee employee, Shift shift){
-		Object[] temp = {employee, shift};
-		employees.add(temp);
-	}
+//	public void addEmployee(Employee employee, Shift shift){
+//		Object[] temp = {employee, shift};
+//		employees.add(temp);
+//	}
 
 	/**
 	 * Adds employee to the Work Day with associated shift begin and end.
