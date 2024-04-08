@@ -8,7 +8,7 @@ import java.sql.Statement;
 
 public class DBUtils {
 
-    private static final String URL = "jdbc:sqlite:test.sqlite";
+    private static final String URL = "jdbc:sqlite:scheduleplanner.sqlite";
 
     public static void initializeDatabase() throws SQLException {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS employee ("
