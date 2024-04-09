@@ -1,4 +1,4 @@
-package PP2024;
+package it.scheduleplanner.util;
 
 public interface Employee {
 
