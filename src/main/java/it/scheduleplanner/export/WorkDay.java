@@ -1,4 +1,6 @@
 package it.scheduleplanner.export;
+
+import it.scheduleplanner.utils.Employee;
 import java.util.ArrayList;
 
 public class WorkDay implements Day{
