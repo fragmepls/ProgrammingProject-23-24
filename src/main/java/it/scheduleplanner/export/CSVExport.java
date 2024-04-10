@@ -13,7 +13,7 @@ import java.time.LocalDate;
 
 public class CSVExport implements Export{
 	
-	public static void simpleExport(ShiftSchedule schedule){
+	public static void simpleScheduleExport(ShiftSchedule schedule){
 		String fileName = createFile(schedule.getBeginOfSchedule().toString());
 		String content = createFileContent(schedule);
 		writeToFile(fileName, content);

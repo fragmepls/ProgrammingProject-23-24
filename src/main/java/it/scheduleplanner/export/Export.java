@@ -7,6 +7,6 @@ public interface Export {
 	 * @param calendar
 	 */
 	public static void CSVExport(ShiftSchedule schedule){
-		CSVExport.simpleExport(schedule);
+		CSVExport.simpleScheduleExport(schedule);
 	}
 }

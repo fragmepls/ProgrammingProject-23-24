@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public class ExportableSchedule implements ShiftSchedule{
 
 	private LocalDate beginOfSchedule;
-	Map<LocalDate, Day> schedule = new HashMap<LocalDate, Day>();
+	private Map<LocalDate, Day> schedule = new HashMap<LocalDate, Day>();
 	
 	/**
 	 * Constructs a new exportable schedule with the Days mapped to the Dates
