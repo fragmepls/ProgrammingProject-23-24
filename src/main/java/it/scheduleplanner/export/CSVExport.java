@@ -1,15 +1,21 @@
 package it.scheduleplanner.export;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.BufferedWriter;
+
+import java.nio.file.Path;
+import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 
 public class CSVExport implements Export{
 	
-	public static void simpleExport(CalendarInt calendar){
-		String fileName = createFile(calendar.getBeginOfCalendar());
-		String content = createFileContent(calendar);
+	public static void simpleExport(ShiftSchedule schedule){
+		String fileName = createFile(schedule.getBeginOfCalendar());
+		String content = createFileContent(schedule);
 		writeToFile(fileName, content);
 	}
 	
@@ -38,22 +44,17 @@ public class CSVExport implements Export{
 	}
 	
 	
-	private static String createFileContent(CalendarInt calendar) {
+	private static String createFileContent(ShiftSchedule schedule) {
 		return "complete export coming soon";
 	}
 	
 	
-	private static void writeToFile(String fileName, String content) {
-		try {
-			FileWriter writer = new FileWriter(fileName);
-			writer.write(content);
-			writer.close();
-			//TODO log
-		}
-		catch (IOException e) {
-			//TODO log
-			e.printStackTrace();
-		}
+	private static void writeToFile(String file, String content) {
+		try(PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file)))){
+	        writer.println(content);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
 	}
 }
 

@@ -26,10 +26,10 @@ public class WorkDay implements Day{
 	 * @param employee Employee to add to the Work Day
 	 * @param shift To select from enum Shift, determines the shift
 	 */
-//	public void addEmployee(Employee employee, Shift shift){
-//		Object[] temp = {employee, shift};
-//		employees.add(temp);
-//	}
+	public void addEmployee(Employee employee, Shift shift){
+		Object[] temp = {employee, shift};
+		employees.add(temp);
+	}
 
 	/**
 	 * Adds employee to the Work Day with associated shift begin and end.
@@ -37,20 +37,19 @@ public class WorkDay implements Day{
 	 * @param begin Determines the begin of the shift
 	 * @param end Determines the end of the shift
 	 */
-	public void addEmployee(Employee employee, int begin, int end){
-		Object[] temp = {employee, begin, end};
-		employees.add(temp);
-	}
+//	public void addEmployee(Employee employee, int begin, int end){
+//		Object[] temp = {employee, begin, end};
+//		employees.add(temp);
+//	}
 
 	/**
-	 * Returns ArrayList of the assigned employees with parameters: [Employee employee, Shift shift / shift begin*, shift end**]<br/>
+	 * 
+	 * @return ArrayList of the assigned employees with parameters: [Employee employee, Shift shift / shift begin*, shift end**]<br/>
 	 * 
 	 * * either enum Shift constant or shift begin
 	 * ** only if a shift begin was specified
-	 * 
-	 * @return 
 	 */
-	public ArrayList<Object[]> getEmployees() {
+	public ArrayList<Object[]> getEmployeesWithShifts() {
 		return employees;
 	}
 	

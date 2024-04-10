@@ -2,7 +2,7 @@ package it.scheduleplanner.export;
 import java.time.LocalDate;
 import java.util.Map;
 
-public interface CalendarInt {
+public interface ShiftSchedule {
 
 	/**
 	 * 
@@ -13,13 +13,13 @@ public interface CalendarInt {
 	
 	/**
 	 * 
-	 * @return java Date begin of the Calendar
+	 * @return java LocalDate begin of the Schedule
 	 */
-	public LocalDate getBeginOfCalendar();
+	public LocalDate getBeginOfSchedule();
 	
 	/**
 	 * 
-	 * @return the Calendar as Map<Date, Day> HashMap
+	 * @return the Schedule as Map<LocalDate, Day> HashMap
 	 */
-	public Map<LocalDate, Day> getCalendar();
+	public Map<LocalDate, Day> getSchedule();
 }
