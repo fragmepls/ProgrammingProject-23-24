@@ -1,4 +1,4 @@
-package it.scheduleplanner.util;
+package it.scheduleplanner.utils;
 
 public interface Employee {
 

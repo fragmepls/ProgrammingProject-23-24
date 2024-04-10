@@ -1,4 +1,6 @@
 package it.scheduleplanner.export;
+
+import it.scheduleplanner.utils.Employee;
 import java.util.ArrayList;
 
 public interface Day {
@@ -32,5 +34,5 @@ public interface Day {
 	 * 
 	 * @return 
 	 */
-	public ArrayList<Object[]> getEmployees();
+	public ArrayList<Object[]> getEmployeesWithShifts();
 }

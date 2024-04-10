@@ -14,14 +14,13 @@ import java.time.LocalDate;
 public class CSVExport implements Export{
 	
 	public static void simpleExport(ShiftSchedule schedule){
-		String fileName = createFile(schedule.getBeginOfSchedule());
+		String fileName = createFile(schedule.getBeginOfSchedule().toString());
 		String content = createFileContent(schedule);
 		writeToFile(fileName, content);
 	}
 	
-	private static String createFile(LocalDate date) {
-		String dateS = date.toString();
-		String fileName = dateS + ".csv";
+	private static String createFile(String title) {
+		String fileName = title + ".csv";
 		int i = 1;
 		try {
 		    while (true) {
@@ -31,7 +30,7 @@ public class CSVExport implements Export{
 		    		return fileName;
 			    } 
 			    else {
-			    	fileName = "(" + i + ")" + dateS + ".csv";
+			    	fileName = "(" + i + ")" + title + ".csv";
 			    	i++;
 				}
 			}
