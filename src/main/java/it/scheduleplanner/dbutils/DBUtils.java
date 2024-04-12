@@ -14,7 +14,9 @@ public class DBUtils {
         String createTableSQL = "CREATE TABLE IF NOT EXISTS employee ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "name TEXT NOT NULL,"
-                + "age INTEGER)";
+                + "overTimeHours REAL,"
+                + "weekendWorker BOOLEAN,"
+                + "workingHours INTEGER)";
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
