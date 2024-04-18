@@ -4,16 +4,16 @@ import java.util.HashMap;
 import java.time.LocalDate;
 
 
-public class ExportableSchedule implements ShiftSchedule{
+public class FixedShiftsSchedule{
 
 	private LocalDate beginOfSchedule;
-	private Map<LocalDate, FixedShiftDay> scheduleFixedShifts = new HashMap<LocalDate, FixedShiftDay>();
+	private Map<LocalDate, FixedShiftDay> schedule = new HashMap<LocalDate, FixedShiftDay>();
 	
 	/**
 	 * Constructs a new exportable schedule with the Days mapped to the Dates
 	 * @param beginOfSchedule java Date
 	 */
-	public ExportableSchedule(LocalDate beginOfSchedule) {
+	public FixedShiftsSchedule(LocalDate beginOfSchedule) {
 		this.beginOfSchedule = beginOfSchedule;
 	}
 	
@@ -22,8 +22,8 @@ public class ExportableSchedule implements ShiftSchedule{
 	 * @param date
 	 * @param workDay
 	 */
-	public void addFixedShiftDay(LocalDate date, FixedShiftDay workDay) {
-		scheduleFixedShifts.put(date, workDay);
+	public void addDay(LocalDate date, FixedShiftDay workDay) {
+		schedule.put(date, workDay);
 	}
 
 	/**
@@ -38,8 +38,8 @@ public class ExportableSchedule implements ShiftSchedule{
 	 * 
 	 * @return the Schedule as Map<Date, Day> HashMap
 	 */
-	public Map<LocalDate, FixedShiftDay> getFixedShiftSchedule() {
-		return scheduleFixedShifts;
+	public Map<LocalDate, FixedShiftDay> getSchedule() {
+		return schedule;
 	}
 	
 	

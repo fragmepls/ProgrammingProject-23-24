@@ -29,7 +29,7 @@ public class CSVExport implements Export{
 	private static LocalDate beginOfSchedule = null;
 	private static LocalDate endOfSchedule = null;
 	
-	public static void simpleScheduleExport(ShiftSchedule scheduleToExport, String pathToDirectory){
+	public static void simpleScheduleExport(FixedShiftsSchedule scheduleToExport, String pathToDirectory){
 		initPredefinedLines();
 		initVariables(scheduleToExport);
 		String fileName = createFile(beginOfSchedule.toString(), pathToDirectory);
@@ -91,8 +91,8 @@ public class CSVExport implements Export{
 		definedCSVLines.put(DefinedLinesTag.AFTERNOON, ";afternoon;");
 	}
 	
-	private static void initVariables(ShiftSchedule scheduleToExport) {
-		schedule = scheduleToExport.getFixedShiftSchedule();
+	private static void initVariables(FixedShiftsSchedule scheduleToExport) {
+		schedule = scheduleToExport.getSchedule();
 		scheduleDates = new ArrayList<>(schedule.keySet());
 		Collections.sort(scheduleDates);
 		beginOfSchedule = scheduleToExport.getBeginOfSchedule();
