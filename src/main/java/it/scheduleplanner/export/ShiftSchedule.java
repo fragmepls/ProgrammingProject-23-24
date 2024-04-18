@@ -9,7 +9,7 @@ public interface ShiftSchedule {
 	 * @param date
 	 * @param workDay
 	 */
-	public void addDay(LocalDate date, Day workDay);
+	public void addFixedShiftDay(LocalDate date, FixedShiftDay workDay);
 	
 	/**
 	 * 
@@ -21,5 +21,5 @@ public interface ShiftSchedule {
 	 * 
 	 * @return the Schedule as Map<LocalDate, Day> HashMap
 	 */
-	public Map<LocalDate, Day> getSchedule();
+	public Map<LocalDate, FixedShiftDay> getFixedShiftSchedule();
 }
