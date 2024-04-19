@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-public class FloatingShiftDay extends Day{
+public class FloatingShiftDay{
 
 	private List<Object[]> employees = new ArrayList<Object[]>();
 	

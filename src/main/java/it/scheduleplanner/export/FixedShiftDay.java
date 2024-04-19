@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-public class FixedShiftDay extends Day{
+public class FixedShiftDay{
 
 	private Map<Shift, List<Employee>> employees = new HashMap<>();
 	
