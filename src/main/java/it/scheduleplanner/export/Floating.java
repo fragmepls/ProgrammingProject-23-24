@@ -1,6 +1,7 @@
 package it.scheduleplanner.export;
 
 import java.util.List;
+import it.scheduleplanner.utils.Employee;
 
 public interface Floating {
 	

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
-
+import it.scheduleplanner.utils.Employee;
 public class FloatingShiftDay{
 
 	private List<Object[]> employees = new ArrayList<Object[]>();

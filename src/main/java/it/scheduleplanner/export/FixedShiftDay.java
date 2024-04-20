@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
-
+import it.scheduleplanner.utils.Employee;
 public class FixedShiftDay{
 
 	private Map<Shift, List<Employee>> employees = new HashMap<>();
@@ -40,7 +40,7 @@ public class FixedShiftDay{
 	 * @return Employees mapped to Shift
 	 */
 	public Map<Shift, List<Employee>> getEmployees() {
-		return null;
+		return employees;
 	}
 	
 }

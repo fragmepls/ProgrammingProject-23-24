@@ -8,11 +8,12 @@ import java.util.Locale;
 import java.util.ArrayList;
 import java.util.Set;
 
+import it.scheduleplanner.utils.Employee;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.instrument.ClassDefinition;
 import java.io.BufferedWriter;
 
 import java.nio.file.Path;
@@ -47,7 +48,7 @@ public class CSVExport implements Export{
 		createExportMap();
 		String fileName = createFile(beginOfSchedule.toString(), pathToDirectory);
 		
-		createFileContent();
+		createScheduleFileContent();
 		writeToFile(fileName);
 	}
 	
@@ -63,6 +64,7 @@ public class CSVExport implements Export{
 		try {
 		    while (true) {
 		    	if (!Files.exists(Path.of(fileNew))) {
+		    		System.out.println("create file: " + fileNew);
 		    		Files.createFile(Path.of(fileNew));
 		    		// TODO log
 		    		return fileNew;
@@ -77,14 +79,15 @@ public class CSVExport implements Export{
 			//TODO log
 			e.printStackTrace();
 		}
-		return null;
+		return fileNew;
 	}
 	
 	
-	private static void createFileContent() {
+	private static void createScheduleFileContent() {
 		fileContentList.add(definedCSVLines.get(DefinedLinesTag.SCHEDULE_HEADER));
 		
 		for (LocalDate date = beginOfExport; date.getDayOfYear() <= endOfExport.getDayOfYear(); date = date.plusDays(7)) {
+			System.out.println(date + " = first day in export");
 			writeWeek(date);
 		}
 		
@@ -93,6 +96,7 @@ public class CSVExport implements Export{
 	
 	private static void writeToFile(String file) {
 		try{
+			System.out.println("write to file: " + file);
 			Files.write(Path.of(file), fileContentList);
 	    } catch (IOException e) {
 	        e.printStackTrace();
@@ -173,31 +177,137 @@ public class CSVExport implements Export{
 	}
 	
 	private static void writeWeek(LocalDate start) {
+		DateTimeFormatter formatter_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+		
+		List<Employee> morningList = new ArrayList<Employee>();
+		List<Employee> afternoonList = new ArrayList<Employee>();
+		List<Employee> fullList = new ArrayList<Employee>();
+		
 		int maxMorning = 0;
+		int morningLines = 1;
 		int maxAfternoon = 0;
+		int afternoonLines = 1;
 		int maxFull = 0;
+		int fullLines = 1;
 		int lines = 0;
-		for (LocalDate date = start; date.getDayOfYear() <= start.getDayOfYear() + 6; date.plusDays(1)) {
+		for (LocalDate date = start; date.getDayOfYear() <= start.getDayOfYear() + 6; date = date.plusDays(1)) {
+			
 			if (scheduleDates.contains(date)) {
 				int temp = 0;
+				
 				temp = exportMap.get(date).get(Shift.MORNING).size();
 				if (temp > maxMorning) {
 					maxMorning = temp;
+					if (maxMorning > 0) {
+						morningLines = temp;
+					}
 				}
 				temp = exportMap.get(date).get(Shift.AFTERNOON).size();
 				if (temp > maxAfternoon) {
 					maxAfternoon = temp;
+					if (maxMorning > 0) {
+						afternoonLines = temp;
+					}
 				}
 				temp = exportMap.get(date).get(Shift.FULL).size();
 				if (temp > maxFull) {
 					maxFull = temp;
+					if (maxMorning > 0) {
+						fullLines = temp;
+					}
 				}
 			}
 		}
-		lines = Integer.max(maxMorning + maxAfternoon + 1, maxFull);
 		
-		fileContentList.add(definedCSVLines.get(DefinedLinesTag.WEEK) + start.get(WeekFields.of(Locale.ITALY).weekOfYear()));
+		lines = Integer.max(morningLines + afternoonLines + 1, fullLines) + 2;
+		
+//		TODO ausfuehrlich testen und log
+		
+		String[] content = new String[lines];
+		for (int i = 0; i < content.length; i++) {
+			content[i] = "";
+		}
+		
+		content[0] = definedCSVLines.get(DefinedLinesTag.WEEK) + start.get(WeekFields.of(Locale.ITALY).weekOfYear());
+		for (LocalDate date = start; date.getDayOfYear() <= start.getDayOfYear() + 6; date = date.plusDays(1)) {
+			content[0] += definedCSVLines.get(DefinedLinesTag.DATE) + date.format(formatter_ddMMyyyy);
+		}
+		content[1] = definedCSVLines.get(DefinedLinesTag.MORNING_FULL);
+		
+		
+		for (LocalDate date = start; date.getDayOfYear() <= start.getDayOfYear() + 6; date = date.plusDays(1)) {
+			
+			if (!scheduleDates.contains(date)) {
+				for (int i = 2; i < lines; i++) {
+					if (i == morningLines + 2) {
+						content[i] += definedCSVLines.get(DefinedLinesTag.AFTERNOON);
+					}
+					else {
+						content[i] += ";;";
+					}
+				}
+			}
+			else {
+				//TODO
+				morningList = exportMap.get(date).get(Shift.MORNING);
+				afternoonList = exportMap.get(date).get(Shift.AFTERNOON);
+				fullList = exportMap.get(date).get(Shift.FULL);
+				
+				int i = 2;
+			
+				for (int j = 0; j < morningLines; j++, i++) {
+					if (j < maxMorning && j < maxFull) {
+						content[i] += ";" + morningList.get(j).getName() + ";" + fullList.get(j).getName();
+					}
+					else if (j < maxMorning && j >= maxFull){
+						content[i] += ";" + morningList.get(j).getName() + ";";
+					}
+					else if (j >= maxMorning && j < maxFull){
+						content[i] += ";;" + fullList.get(j).getName();
+					}
+					else {
+						content[i] += ";;";
+					}
+				}
+	
+				if ((i - 2) < maxFull) {
+					content[i] += definedCSVLines.get(DefinedLinesTag.AFTERNOON) + fullList.get(i - 2).getName();
+				}
+				else {
+					content[i] += definedCSVLines.get(DefinedLinesTag.AFTERNOON);
+				}
+				i++;
+		
+				for (int j = 0; j < afternoonLines; j++, i++) {
+					if (j < maxAfternoon && (i - 2) < maxFull) {
+						content[i] += ";" + afternoonList.get(j).getName() + ";" + fullList.get(i - 2).getName();
+					}
+					else if (j < maxAfternoon && i >= maxFull + 2) {
+						content[i] += ";" + afternoonList.get(j).getName() + ";";
+					}
+					else if (j >= maxAfternoon && i < maxFull + 2) {
+						content[i] += ";;" + fullList.get(i - 2).getName();
+					}
+					else {
+						content[i] += ";;";
+					}
+				}
+				
+			}
+			
+			
+		}
+		
+//		Adding generated Lines to List
+		for (String string : content) {
+			if (string != null) {
+				fileContentList.add(string);
+			}
+		}
+		
 	}
+	
+	
 }
 
 
