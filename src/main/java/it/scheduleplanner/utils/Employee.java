@@ -6,14 +6,14 @@ public class Employee implements EmployeeInterface {
 	private double overTimeHours = 0.0; //starts always from 0 - not in constructor needed
 	private boolean weekendWorker;
 	private String freeDay;
-	private int workingHours;  //50/100 (in %)
+	private int workingHours;
 
 	//constructor for Employee - overTimeHours does not need to get taken since every employee starts at 0.0
 	public Employee(String name, boolean weekendWorker, String freeDay, int workingHours) {
 		this.name = name;
 		this.weekendWorker = weekendWorker;
 		this.freeDay = freeDay;
-		this.workingHours = workingHours;
+		this.workingHours = ((workingHours/100)*40);
 	}
 
 	//all getters and setters here
