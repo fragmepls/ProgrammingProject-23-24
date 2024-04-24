@@ -10,11 +10,7 @@ import java.util.Set;
 
 import it.scheduleplanner.utils.Employee;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.BufferedWriter;
 
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -23,7 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.time.LocalDate;
 
-public class CSVExport implements Export{
+public class CSVExport implements Export {
 	
 	private static Map<DefinedLinesTag, String> definedCSVLines = new HashMap<>();
 	
@@ -38,8 +34,6 @@ public class CSVExport implements Export{
 	private static LocalDate endOfSchedule = null;
 	private static LocalDate beginOfExport = null;
 	private static LocalDate endOfExport = null;
-	
-	private static int exportLength = 0;
 	
 	public static void simpleScheduleExport(FixedShiftsSchedule scheduleToExport, String pathToDirectory){
 		initPredefinedLines();
@@ -173,7 +167,6 @@ public class CSVExport implements Export{
 			break;
 		}
 		
-		exportLength = endOfExport.getDayOfYear() - beginOfExport.getDayOfYear();
 	}
 	
 	private static void writeWeek(LocalDate start) {
@@ -205,20 +198,19 @@ public class CSVExport implements Export{
 				temp = exportMap.get(date).get(Shift.AFTERNOON).size();
 				if (temp > maxAfternoon) {
 					maxAfternoon = temp;
-					if (maxMorning > 0) {
+					if (maxAfternoon > 0) {
 						afternoonLines = temp;
 					}
 				}
 				temp = exportMap.get(date).get(Shift.FULL).size();
 				if (temp > maxFull) {
 					maxFull = temp;
-					if (maxMorning > 0) {
+					if (maxFull > 0) {
 						fullLines = temp;
 					}
 				}
 			}
 		}
-		
 		lines = Integer.max(morningLines + afternoonLines + 1, fullLines) + 2;
 		
 //		TODO ausfuehrlich testen und log
@@ -252,17 +244,20 @@ public class CSVExport implements Export{
 				morningList = exportMap.get(date).get(Shift.MORNING);
 				afternoonList = exportMap.get(date).get(Shift.AFTERNOON);
 				fullList = exportMap.get(date).get(Shift.FULL);
+				int morning = morningList.size();
+				int afternoon = afternoonList.size();
+				int full = fullList.size();
 				
 				int i = 2;
 			
 				for (int j = 0; j < morningLines; j++, i++) {
-					if (j < maxMorning && j < maxFull) {
+					if (j < morning && j < full) {
 						content[i] += ";" + morningList.get(j).getName() + ";" + fullList.get(j).getName();
 					}
-					else if (j < maxMorning && j >= maxFull){
+					else if (j < morning && j >= full){
 						content[i] += ";" + morningList.get(j).getName() + ";";
 					}
-					else if (j >= maxMorning && j < maxFull){
+					else if (j >= morning && j < full){
 						content[i] += ";;" + fullList.get(j).getName();
 					}
 					else {
@@ -270,7 +265,7 @@ public class CSVExport implements Export{
 					}
 				}
 	
-				if ((i - 2) < maxFull) {
+				if ((i - 2) < full) {
 					content[i] += definedCSVLines.get(DefinedLinesTag.AFTERNOON) + fullList.get(i - 2).getName();
 				}
 				else {
@@ -279,18 +274,22 @@ public class CSVExport implements Export{
 				i++;
 		
 				for (int j = 0; j < afternoonLines; j++, i++) {
-					if (j < maxAfternoon && (i - 2) < maxFull) {
+					if (j < afternoon && (i - 2) < full) {
 						content[i] += ";" + afternoonList.get(j).getName() + ";" + fullList.get(i - 2).getName();
 					}
-					else if (j < maxAfternoon && i >= maxFull + 2) {
+					else if (j < afternoon && i >= full + 2) {
 						content[i] += ";" + afternoonList.get(j).getName() + ";";
 					}
-					else if (j >= maxAfternoon && i < maxFull + 2) {
+					else if (j >= afternoon && i < full + 2) {
 						content[i] += ";;" + fullList.get(i - 2).getName();
 					}
 					else {
 						content[i] += ";;";
 					}
+				}
+				while (i < lines) {
+					content[i] += ";;" + fullList.get(i - 2).getName();
+					i++;
 				}
 				
 			}
