@@ -14,8 +14,8 @@ public class MainTest {
 		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("E, yyyy-MM-dd");
 		LocalDate date = LocalDate.now();
 		String s = date.toString();
-		FixedShiftDay day = new FixedShiftDay();
-		FixedShiftDay day2 = new FixedShiftDay();
+		ShiftDayInterface day = new FixedShiftDay();
+		ShiftDayInterface day2 = new FixedShiftDay();
 		Employee empl1 = new EmployeeImpl("empl1");
 		Employee empl2 = new EmployeeImpl("empl2");
 		Employee empl3 = new EmployeeImpl("empl3");

@@ -23,7 +23,7 @@ public class CSVExport implements Export {
 	
 	private static Map<DefinedLinesTag, String> definedCSVLines = new HashMap<>();
 	
-	private static Map<LocalDate, FixedShiftDay> schedule = new HashMap<>();
+	private static Map<LocalDate, ShiftDayInterface> schedule = new HashMap<>();
 	private static List<LocalDate> scheduleDates = null;
 	
 	private static Map<LocalDate, Map<Shift, List<Employee>>> exportMap = new HashMap<LocalDate, Map<Shift,List<Employee>>>();
@@ -35,7 +35,7 @@ public class CSVExport implements Export {
 	private static LocalDate beginOfExport = null;
 	private static LocalDate endOfExport = null;
 	
-	public static void simpleScheduleExport(FixedShiftsSchedule scheduleToExport, String pathToDirectory){
+	public static void simpleScheduleExport(ShiftSchedule scheduleToExport, String pathToDirectory){
 		initPredefinedLines();
 		initVariables(scheduleToExport);
 		
@@ -105,7 +105,7 @@ public class CSVExport implements Export {
 		definedCSVLines.put(DefinedLinesTag.AFTERNOON, ";afternoon;");
 	}
 	
-	private static void initVariables(FixedShiftsSchedule scheduleToExport) {
+	private static void initVariables(ShiftSchedule scheduleToExport) {
 		schedule = scheduleToExport.getSchedule();
 		scheduleDates = new ArrayList<>(schedule.keySet());
 		Collections.sort(scheduleDates);
