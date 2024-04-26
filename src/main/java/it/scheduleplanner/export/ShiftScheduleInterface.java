@@ -3,7 +3,7 @@ package it.scheduleplanner.export;
 import java.time.LocalDate;
 import java.util.Map;
 
-public interface ShiftSchedule {
+public interface ShiftScheduleInterface {
 
 	/**
 	 * 

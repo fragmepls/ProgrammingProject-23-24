@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.time.LocalDate;
 
-public class FixedShiftsSchedule implements ShiftSchedule {
+public class FixedShiftsSchedule implements ShiftScheduleInterface {
 
 	private LocalDate beginOfSchedule;
 	private Map<LocalDate, ShiftDayInterface> schedule = new HashMap<LocalDate, ShiftDayInterface>();

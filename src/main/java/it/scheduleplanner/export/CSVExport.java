@@ -34,7 +34,7 @@ public class CSVExport implements Export {
 	private static LocalDate beginOfExport = null;
 	private static LocalDate endOfExport = null;
 	
-	public static void simpleScheduleExport(ShiftSchedule scheduleToExport, String pathToDirectory){
+	public static void simpleScheduleExport(ShiftScheduleInterface scheduleToExport, String pathToDirectory){
 		initPredefinedLines();
 		initVariables(scheduleToExport);
 		
@@ -104,7 +104,7 @@ public class CSVExport implements Export {
 		definedCSVLines.put(DefinedLinesTag.AFTERNOON, ";afternoon;");
 	}
 	
-	private static void initVariables(ShiftSchedule scheduleToExport) {
+	private static void initVariables(ShiftScheduleInterface scheduleToExport) {
 		schedule = scheduleToExport.getSchedule();
 		scheduleDates = new ArrayList<>(schedule.keySet());
 		Collections.sort(scheduleDates);
