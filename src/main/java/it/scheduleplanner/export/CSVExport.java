@@ -18,6 +18,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.time.LocalDate;
 
+/**
+ * The CSVExport class houses all necessary methods to export:<br>
+ * - it.scheduleplanner.FixedShiftsSchedule objects<br>
+ * 
+ */
 public class CSVExport implements Export {
 	
 	private static Map<DefinedLinesTag, String> definedCSVLines = new HashMap<>();
@@ -34,6 +39,11 @@ public class CSVExport implements Export {
 	private static LocalDate beginOfExport = null;
 	private static LocalDate endOfExport = null;
 	
+	/**
+	 * This method exports a FixedShiftsSchedule to a CSV File located in the indicated directory.
+	 * @param scheduleToExport
+	 * @param pathToDirectory
+	 */
 	public static void simpleScheduleExport(ShiftScheduleInterface scheduleToExport, String pathToDirectory){
 		initPredefinedLines();
 		initVariables(scheduleToExport);
@@ -45,6 +55,12 @@ public class CSVExport implements Export {
 		writeToFile(fileName);
 	}
 	
+	/**
+	 * 
+	 * @param title
+	 * @param pathToDirectory
+	 * @return path to file
+	 */
 	private static String createFile(String title, String pathToDirectory) {
 		String file = title + ".csv";
 		String fileNew = "";
@@ -53,16 +69,17 @@ public class CSVExport implements Export {
 		}
 		
 		fileNew = pathToDirectory + file;
-		int i = 1;
+		int i = 1; //variable to alter filename
 		try {
 		    while (true) {
-		    	if (!Files.exists(Path.of(fileNew))) {
+		    	if (!Files.exists(Path.of(fileNew))) { //if file doesn't already exist
 		    		System.out.println("create file: " + fileNew);
-		    		Files.createFile(Path.of(fileNew));
+		    		Files.createFile(Path.of(fileNew)); //create file
 		    		// TODO log
-		    		return fileNew;
+		    		return fileNew; //return path to file
 			    } 
-			    else {
+			    else { //file already exists
+			    	//add prefix to file
 			    	fileNew = pathToDirectory + "(" + i + ")" + file;
 			    	i++;
 				}
@@ -72,13 +89,14 @@ public class CSVExport implements Export {
 			//TODO log
 			e.printStackTrace();
 		}
-		return fileNew;
+		return null;
 	}
 	
 	
 	private static void createScheduleFileContent() {
-		fileContentList.add(definedCSVLines.get(DefinedLinesTag.SCHEDULE_HEADER));
+		fileContentList.add(definedCSVLines.get(DefinedLinesTag.SCHEDULE_HEADER)); //add Header to content
 		
+		//iterate trough the dates and add the days to the content
 		for (LocalDate date = beginOfExport; date.getDayOfYear() <= endOfExport.getDayOfYear(); date = date.plusDays(7)) {
 			System.out.println(date + " = first day in export");
 			writeWeek(date);
@@ -105,11 +123,11 @@ public class CSVExport implements Export {
 	}
 	
 	private static void initVariables(ShiftScheduleInterface scheduleToExport) {
-		schedule = scheduleToExport.getSchedule();
-		scheduleDates = new ArrayList<>(schedule.keySet());
-		Collections.sort(scheduleDates);
-		beginOfSchedule = scheduleToExport.getBeginOfSchedule();
-		endOfSchedule = scheduleDates.get(scheduleDates.size() - 1);
+		schedule = scheduleToExport.getSchedule(); //schedule
+		scheduleDates = new ArrayList<>(schedule.keySet()); //list of all dates occupied by a day
+		Collections.sort(scheduleDates); //sort dates
+		beginOfSchedule = scheduleToExport.getBeginOfSchedule(); //first date occupied by a day
+		endOfSchedule = scheduleDates.get(scheduleDates.size() - 1); //last date occupied by a day
 	}
 	
 	private static void createExportMap() {
@@ -118,6 +136,7 @@ public class CSVExport implements Export {
 			exportMap.put(date, schedule.get(date).getEmployees());
 		}
 		
+		//calculate first date to be exported which has to be the first Monday prior to the first occupied date unless itself is a Monday. 
 		switch(beginOfSchedule.getDayOfWeek().toString()) {
 		case "MONDAY":
 			beginOfExport = beginOfSchedule;
@@ -141,7 +160,8 @@ public class CSVExport implements Export {
 			beginOfExport = beginOfSchedule.minusDays(6);
 			break;
 		}
-		
+
+		//calculate last date to be exported which has to be the first Friday after to the last occupied date unless itself is a Friday. 
 		switch(endOfSchedule.getDayOfWeek().toString()) {
 		case "MONDAY":
 			endOfExport = endOfSchedule.plusDays(6);
@@ -168,6 +188,10 @@ public class CSVExport implements Export {
 		
 	}
 	
+	/**
+	 * 
+	 * @param start (date of Monday)
+	 */
 	private static void writeWeek(LocalDate start) {
 		DateTimeFormatter formatter_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 		
@@ -182,6 +206,10 @@ public class CSVExport implements Export {
 		int maxFull = 0;
 		int fullLines = 1;
 		int lines = 0;
+		/*
+		 * calculate the needed lines for the week
+		 * lines per shift = number of employees working per shift.
+		 */
 		for (LocalDate date = start; date.getDayOfYear() <= start.getDayOfYear() + 6; date = date.plusDays(1)) {
 			
 			if (scheduleDates.contains(date)) {
@@ -210,24 +238,30 @@ public class CSVExport implements Export {
 				}
 			}
 		}
+		//calculating the needed amount of lines for the whole week to have a symmetric layout
 		lines = Integer.max(morningLines + afternoonLines + 1, fullLines) + 2;
 		
 //		TODO ausfuehrlich testen und log
 		
+		//Array of length lines needed for the week
 		String[] content = new String[lines];
 		for (int i = 0; i < content.length; i++) {
 			content[i] = "";
 		}
 		
+		//add line indicating the weekdays
 		content[0] = definedCSVLines.get(DefinedLinesTag.WEEK) + start.get(WeekFields.of(Locale.ITALY).weekOfYear());
+		//add the line indicating the dates
 		for (LocalDate date = start; date.getDayOfYear() <= start.getDayOfYear() + 6; date = date.plusDays(1)) {
 			content[0] += definedCSVLines.get(DefinedLinesTag.DATE) + date.format(formatter_ddMMyyyy);
 		}
+		//add the line indicating the morning and full shift
 		content[1] = definedCSVLines.get(DefinedLinesTag.MORNING_FULL);
 		
-		
+		//iterate over all days of the week
 		for (LocalDate date = start; date.getDayOfYear() <= start.getDayOfYear() + 6; date = date.plusDays(1)) {
 			
+			//day is not contained in the schedule
 			if (!scheduleDates.contains(date)) {
 				for (int i = 2; i < lines; i++) {
 					if (i == morningLines + 2) {
@@ -238,8 +272,8 @@ public class CSVExport implements Export {
 					}
 				}
 			}
+			//day is contained in the schedule
 			else {
-				//TODO
 				morningList = exportMap.get(date).get(Shift.MORNING);
 				afternoonList = exportMap.get(date).get(Shift.AFTERNOON);
 				fullList = exportMap.get(date).get(Shift.FULL);
@@ -248,7 +282,8 @@ public class CSVExport implements Export {
 				int full = fullList.size();
 				
 				int i = 2;
-			
+				
+				//add all the employees to their shifts while maintaining symmetry.
 				for (int j = 0; j < morningLines; j++, i++) {
 					if (j < morning && j < full) {
 						content[i] += ";" + morningList.get(j).getName() + ";" + fullList.get(j).getName();

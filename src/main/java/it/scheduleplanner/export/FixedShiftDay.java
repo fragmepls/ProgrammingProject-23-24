@@ -7,6 +7,9 @@ import java.util.ArrayList;
 
 import it.scheduleplanner.utils.EmployeeInterface;
 
+/**
+ * An object that maps Employees to their respective Shift and may be used as a way to indicate a Shift plan for a day.
+ */
 public class FixedShiftDay implements ShiftDayInterface {
 
 	private Map<Shift, List<EmployeeInterface>> employees = new HashMap<>();
@@ -25,6 +28,9 @@ public class FixedShiftDay implements ShiftDayInterface {
 	}
 
 	public void addEmployee(EmployeeInterface employee, Shift shift){
+		if (shift.equals(Shift.HALF)) {
+			shift = Shift.MORNING;
+		}
 		employees.get(shift).add(employee);
 	}
 	

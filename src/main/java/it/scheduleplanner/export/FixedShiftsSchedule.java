@@ -4,6 +4,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.time.LocalDate;
 
+/**
+ * Object that represents a shift-schedule and stores FixedShiftDays mapped to their dates.<br>
+ * It may be used to create a schedule exportable through some method specified in it.scheduleplanner.export.Export
+ */
 public class FixedShiftsSchedule implements ShiftScheduleInterface {
 
 	private LocalDate beginOfSchedule;
@@ -11,14 +15,14 @@ public class FixedShiftsSchedule implements ShiftScheduleInterface {
 	
 	/**
 	 * Constructs a new exportable schedule with the Days mapped to the Dates
-	 * @param beginOfSchedule java Date
+	 * @param LocalDate beginOfSchedule = first day of the schedule
 	 */
 	public FixedShiftsSchedule(LocalDate beginOfSchedule) {
 		this.beginOfSchedule = beginOfSchedule;
 	}
 	
-	public void addDay(LocalDate date, ShiftDayInterface workDay) {
-		schedule.put(date, workDay);
+	public void addDay(LocalDate date, ShiftDayInterface day) {
+		schedule.put(date, day);
 	}
 
 	public LocalDate getBeginOfSchedule() {

@@ -4,6 +4,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
 
 import it.scheduleplanner.export.*;
 import it.scheduleplanner.utils.*;
@@ -43,6 +45,17 @@ public class MainTest {
 //		LocalDate date = LocalDate.of(2024, 4, 2);
 //		date = date.plusDays(1);
 //		System.out.println(date.toString());
+		
+		for (int i = 0; i <10 ;i++){
+			if (i%2==0) {
+				continue;
+			}
+			System.out.println(i);
+		}
+		Map<Integer, Boolean> export = new HashMap<>();
+	
 	}
+	
+	
 
 }
