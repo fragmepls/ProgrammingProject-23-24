@@ -1,18 +1,20 @@
 package it.scheduleplanner.utils;
 
+import java.time.DayOfWeek;
+
 public class Employee implements EmployeeInterface {
 	
 	private String name;
 	private double overTimeHours = 0.0; //starts always from 0 - not in constructor needed
 	private boolean weekendWorker;
-	private String freeDay;
+	private DayOfWeek freeDay;
 	private int workingHours;
 
 	//constructor for Employee - overTimeHours does not need to get taken since every employee starts at 0.0
 	public Employee(String name, boolean weekendWorker, String freeDay, int workingHours) {
 		this.name = name;
+		this.freeDay = DayOfWeek.valueOf(freeDay);
 		this.weekendWorker = weekendWorker;
-		this.freeDay = freeDay;
 		this.workingHours = ((workingHours/100)*40);
 	}
 
@@ -41,12 +43,12 @@ public class Employee implements EmployeeInterface {
 		this.weekendWorker = weekendWorker;
 	}
 
-	public String getFreeDay() {
+	public DayOfWeek getFreeDay() {
 		return freeDay;
 	}
 
 	public void setFreeDay(String freeDay) {
-		this.freeDay = freeDay;
+		this.freeDay = DayOfWeek.valueOf(freeDay);
 	}
 
 	public int getWorkingHours() {
@@ -64,4 +66,8 @@ public class Employee implements EmployeeInterface {
         /* ToDo */
 		return 0;
 	}
+
+	//all methods needed for vacation
+
+
 }
