@@ -15,7 +15,7 @@ public class Vacation {
         this.vacationEnd = vacationEnd;
     }
 
-    public boolean  isAvailable(LocalDate checkingDate) {
+    public boolean  isNotOnVacation(LocalDate checkingDate) {
         this.checkingDate = checkingDate;
 
         if (!checkingDate.isAfter(vacationEnd) && !checkingDate.isBefore(vacationStart)) {

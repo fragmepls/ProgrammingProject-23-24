@@ -9,7 +9,7 @@ public class Employee implements EmployeeInterface {
 	private boolean weekendWorker;
 	private DayOfWeek freeDay;
 	private int workingHours;
-
+//TODO store employees into an array/List
 	//constructor for Employee - overTimeHours does not need to get taken since every employee starts at 0.0
 	public Employee(String name, boolean weekendWorker, String freeDay, int workingHours) {
 		this.name = name;
