@@ -10,12 +10,6 @@ import java.util.List;
 import static it.scheduleplanner.planner.EmployeeComparator.getNext;
 
 public class ScheduleCreator {
-    //TODO Create calendar
-    //TODO Loop to iterate over the days between LocalDate beginn - LocalDate end
-    //TODO For every day add date to calendar
-    //TODO For every day take the most adeguate employee(with EmployeeComparator)
-    //TODO if employee = half we need +1 employee
-    //TODO return calendar
 
     static ArrayList<Employee> employeeList = new ArrayList<>();
 
@@ -31,7 +25,7 @@ public class ScheduleCreator {
             currentDate = currentDate.plusDays(1); // Move to the next day
         }
         for (LocalDate date : dateList) {
-            Employee employee1ForThisDay = (Employee) getNext(employeeList, date);
+            Employee employee1ForThisDay = (Employee) getNext(employeeList, date,numberOfEmployeesPerDay);
             day.addEmployee(employee1ForThisDay);
             calendar.addDay(date, day);
         }
