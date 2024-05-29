@@ -24,7 +24,8 @@ public class DBUtils {
                 + "name TEXT NOT NULL,"
                 + "overTimeHours REAL,"
                 + "weekendWorker BOOLEAN,"
-                + "workingHours INTEGER)";
+                + "workingHours INTEGER,"
+                + "freeDay TEXT CHECK( freeDay IN ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY') ) NOT NULL)";
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {
@@ -102,5 +103,11 @@ public class DBUtils {
         if (resultSet != null) {
             resultSet.close();
         }
+    }
+
+    /**
+     * Prevents instantiation.
+     */
+    private DBUtils() {
     }
 }

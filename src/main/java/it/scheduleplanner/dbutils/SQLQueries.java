@@ -6,6 +6,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Utility class for SQL queries.
@@ -15,76 +17,98 @@ public class SQLQueries {
     /**
      * Inserts an employee into the database.
      *
-     * @param employee the employee to insert
+     * @param connection the database connection
+     * @param employee   the employee to insert
      * @throws SQLException if a database access error occurs
      */
-    public static void insertEmployee(Employee employee) throws SQLException {
-        String sql = "INSERT INTO employee (name, overTimeHours, weekendWorker, workingHours) VALUES (?, ?, ?, ?)";
+    public static int insertEmployee(Connection connection, Employee employee) throws SQLException {
+        String sql = "INSERT INTO employee (name, overTimeHours, weekendWorker, workingHours, freeDay) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, employee.getName());
             preparedStatement.setDouble(2, employee.getOverTimeHours());
             preparedStatement.setBoolean(3, employee.isWeekendWorker());
             preparedStatement.setInt(4, employee.getWorkingHours());
+            preparedStatement.setString(5, employee.getFreeDay().toString());
 
-            preparedStatement.executeUpdate();
+            return preparedStatement.executeUpdate();
         }
     }
 
     /**
      * Selects all employees.
      *
+     * @param connection the database connection
      * @return the result set of the query
      * @throws SQLException if a database access error occurs
      */
-    public static ResultSet selectAllEmployees() throws SQLException {
+    public static List<Employee> selectAllEmployees(Connection connection) throws SQLException {
         String sql = "SELECT * FROM employee";
+        List<Employee> employees = new ArrayList<>();
 
-        try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            ResultSet resultSet = preparedStatement.executeQuery();
 
-            return preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Employee employee = new Employee(
+                        resultSet.getString("name"),
+                        resultSet.getBoolean("weekendWorker"),
+                        resultSet.getString("freeDay"),
+                        resultSet.getInt("workingHours")
+                );
+                employees.add(employee);
+            }
+
+            return employees;
         }
     }
 
     /**
      * Selects an employee by ID.
      *
-     * @param id the ID of the employee to select
+     * @param connection the database connection
+     * @param id         the ID of the employee to select
      * @return the result set of the query
      * @throws SQLException if a database access error occurs
      */
-    public static ResultSet selectEmployeeById(int id) throws SQLException {
+    public static Employee selectEmployeeById(Connection connection, int id) throws SQLException {
         String sql = "SELECT * FROM employee WHERE id = ?";
+        Employee employee = null;
 
-        try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, id);
 
-            return preparedStatement.executeQuery();
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                employee = new Employee(
+                        resultSet.getString("name"),
+                        resultSet.getBoolean("weekendWorker"),
+                        resultSet.getString("freeDay"),
+                        resultSet.getInt("workingHours")
+                );
+            }
+
+            return employee;
         }
     }
 
     /**
      * Updates an employee in the database.
      *
-     * @param employee the employee to update
+     * @param connection the database connection
+     * @param employee   the employee to update
      * @throws SQLException if a database access error occurs
      */
-    public static void updateEmployee(Employee employee) throws SQLException {
-        String sql = "UPDATE employee SET name = ?, overTimeHours = ?, weekendWorker = ?, workingHours = ? WHERE id = ?";
+    public static void updateEmployee(Connection connection, Employee employee, int id) throws SQLException {
+        String sql = "UPDATE employee SET name = ?, overTimeHours = ?, weekendWorker = ?, workingHours = ?, freeDay = ? WHERE id = ?";
 
-        try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, employee.getName());
             preparedStatement.setDouble(2, employee.getOverTimeHours());
             preparedStatement.setBoolean(3, employee.isWeekendWorker());
             preparedStatement.setInt(4, employee.getWorkingHours());
-            preparedStatement.setInt(5, 0 /*employee.getId()*/);
+            preparedStatement.setString(5, employee.getFreeDay().toString());
+            preparedStatement.setInt(6, id);
 
             preparedStatement.executeUpdate();
         }
@@ -93,15 +117,14 @@ public class SQLQueries {
     /**
      * Deletes an employee from the database.
      *
-     * @param id the ID of the employee to delete
+     * @param connection the database connection
+     * @param id         the ID of the employee to delete
      * @throws SQLException if a database access error occurs
      */
-    public static void deleteEmployee(int id) throws SQLException {
+    public static void deleteEmployee(Connection connection, int id) throws SQLException {
         String sql = "DELETE FROM employee WHERE id = ?";
 
-        try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, id);
 
             preparedStatement.executeUpdate();
@@ -113,5 +136,4 @@ public class SQLQueries {
      */
     private SQLQueries() {
     }
-
 }
