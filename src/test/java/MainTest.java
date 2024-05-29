@@ -20,17 +20,17 @@ public class MainTest {
 		
 		ShiftDayInterface day = new FixedShiftDay();
 		ShiftDayInterface day2 = new FixedShiftDay();
-		EmployeeInterface empl1 = new Employee("empl1", false, "MONDAY", 100);
+		EmployeeInterface empl1 = new Employee("empl1", false, "MONDAY", true);
 		employees.add(empl1);
-		EmployeeInterface empl2 = new Employee("empl2", false, "MONDAY", 100);
+		EmployeeInterface empl2 = new Employee("empl2", false, "MONDAY", true);
 		employees.add(empl2);
-		EmployeeInterface empl3 = new Employee("empl3", false, "MONDAY", 100);
+		EmployeeInterface empl3 = new Employee("empl3", false, "MONDAY", true);
 		employees.add(empl3);
-		EmployeeInterface empl4 = new Employee("empl4", false, "MONDAY", 100);
+		EmployeeInterface empl4 = new Employee("empl4", false, "MONDAY", true);
 		employees.add(empl4);
-		EmployeeInterface empl5 = new Employee("empl5", false, "MONDAY", 100);
+		EmployeeInterface empl5 = new Employee("empl5", false, "MONDAY", true);
 		employees.add(empl5);
-		EmployeeInterface empl6 = new Employee("empl6", false, "MONDAY", 100);
+		EmployeeInterface empl6 = new Employee("empl6", false, "MONDAY", true);
 		//employees.add(empl6);
 		day.addEmployee(empl1);
 		day.addEmployee(empl2, Shift.AFTERNOON);
