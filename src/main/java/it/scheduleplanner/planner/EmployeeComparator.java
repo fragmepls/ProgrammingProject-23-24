@@ -123,7 +123,9 @@ public class EmployeeComparator {
             }
             return true;
         }
+        return false; //TODO to be changed
     }
+
 }
 
 
