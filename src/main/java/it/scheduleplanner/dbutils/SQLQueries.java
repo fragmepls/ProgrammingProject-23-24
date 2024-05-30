@@ -22,7 +22,7 @@ public class SQLQueries {
      * @throws SQLException if a database access error occurs
      */
     public static int insertEmployee(Connection connection, Employee employee) throws SQLException {
-        String sql = "INSERT INTO employee (name, overTimeHours, weekendWorker, workingHours, freeDay) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO employee (name, overTimeHours, weekendWorker, workingHours, freeDay, fulltimeWorker) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, employee.getName());
@@ -30,6 +30,7 @@ public class SQLQueries {
             preparedStatement.setBoolean(3, employee.isWeekendWorker());
             preparedStatement.setInt(4, employee.getWorkingHours());
             preparedStatement.setString(5, employee.getFreeDay().toString());
+            preparedStatement.setBoolean(6, employee.isFulltimeWorker());
 
             return preparedStatement.executeUpdate();
         }
@@ -54,7 +55,7 @@ public class SQLQueries {
                         resultSet.getString("name"),
                         resultSet.getBoolean("weekendWorker"),
                         resultSet.getString("freeDay"),
-                        resultSet.getInt("workingHours")
+                        resultSet.getBoolean("fulltimeWorker")
                 );
                 employees.add(employee);
             }
@@ -84,7 +85,7 @@ public class SQLQueries {
                         resultSet.getString("name"),
                         resultSet.getBoolean("weekendWorker"),
                         resultSet.getString("freeDay"),
-                        resultSet.getInt("workingHours")
+                        resultSet.getBoolean("fulltimeWorker")
                 );
             }
 
@@ -100,7 +101,7 @@ public class SQLQueries {
      * @throws SQLException if a database access error occurs
      */
     public static void updateEmployee(Connection connection, Employee employee, int id) throws SQLException {
-        String sql = "UPDATE employee SET name = ?, overTimeHours = ?, weekendWorker = ?, workingHours = ?, freeDay = ? WHERE id = ?";
+        String sql = "UPDATE employee SET name = ?, overTimeHours = ?, weekendWorker = ?, workingHours = ?, freeDay = ?, fulltimeWorker = ? WHERE id = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, employee.getName());
@@ -108,7 +109,8 @@ public class SQLQueries {
             preparedStatement.setBoolean(3, employee.isWeekendWorker());
             preparedStatement.setInt(4, employee.getWorkingHours());
             preparedStatement.setString(5, employee.getFreeDay().toString());
-            preparedStatement.setInt(6, id);
+            preparedStatement.setBoolean(6, employee.isFulltimeWorker());
+            preparedStatement.setInt(7, id);
 
             preparedStatement.executeUpdate();
         }
