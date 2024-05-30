@@ -15,8 +15,8 @@ public class Employee implements EmployeeInterface {
     private DayOfWeek freeDay;
     private int workingHours;
     private boolean fullTimeWorker;
-    private List<Vacation> vacationList = new ArrayList<>();;
-
+    private List<Vacation> vacationList = new ArrayList<>();
+    ;
 
 
     //constructor for Employee - overTimeHours does not need to get taken since every employee starts at 0
@@ -49,13 +49,6 @@ public class Employee implements EmployeeInterface {
         return name;
     }
 
-    public boolean isFullTimeWorker() {
-        return fullTimeWorker;
-    }
-
-    public void setFullTimeWorker(boolean fullTimeWorker) {
-        this.fullTimeWorker = fullTimeWorker;
-    }
 
     public void setFreeDay(DayOfWeek freeDay) {
         this.freeDay = freeDay;
@@ -90,7 +83,7 @@ public class Employee implements EmployeeInterface {
     }
 
     public int getWorkingHours() {
-            return workingHours;
+        return workingHours;
 
     }
 
@@ -105,7 +98,12 @@ public class Employee implements EmployeeInterface {
         this.overTimeHours += hours;
     }
 
-    //all methods needed for vacation
 
+    public boolean isFullTimeWorker() {
+        return fullTimeWorker;
+    }
 
+    public void setFullTimeWorker(boolean fullTimeWorker) {
+        this.fullTimeWorker = fullTimeWorker;
+    }
 }
