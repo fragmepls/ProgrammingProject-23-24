@@ -1,24 +1,47 @@
 package it.scheduleplanner.utils;
 
+import it.scheduleplanner.planner.ScheduleCreator;
+
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Employee implements EmployeeInterface {
 
     private String name;
-    private double overTimeHours = 0.0; //starts always from 0 - not in constructor needed
+    private int overTimeHours = 0; //starts always from 0 - not in constructor needed
     private boolean weekendWorker;
     private DayOfWeek freeDay;
     private int workingHours;
-    private boolean fulltimeWorker;
+    private boolean fullTimeWorker;
+    private List<Vacation> vacationList = new ArrayList<>();;
 
 
-    //TODO store employees into an array/List
-    //constructor for Employee - overTimeHours does not need to get taken since every employee starts at 0.0
-    public Employee(String name, boolean weekendWorker, String freeDay, boolean fulltimeWorker) {
+
+    //constructor for Employee - overTimeHours does not need to get taken since every employee starts at 0
+    public Employee(String name, boolean weekendWorker, String freeDay, boolean fullTimeWorker) {
         this.name = name;
-        this.freeDay = DayOfWeek.valueOf(freeDay);
+        this.freeDay = DayOfWeek.valueOf(freeDay.toUpperCase());
         this.weekendWorker = weekendWorker;
-        this.fulltimeWorker = fulltimeWorker;
+        this.fullTimeWorker = fullTimeWorker;
+        ScheduleCreator.addEmployee(this);
+    }
+
+
+    // Method to add a vacation
+    public void addVacation(Vacation vacation) {
+        vacationList.add(vacation);
+    }
+
+    // Method to check if the employee is on vacation on a specific date
+    public boolean isOnVacation(LocalDate date) {
+        for (Vacation vacation : vacationList) {
+            if (vacation.isOnVacation(date)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     //all getters and setters here
@@ -26,12 +49,12 @@ public class Employee implements EmployeeInterface {
         return name;
     }
 
-    public boolean isFulltimeWorker() {
-        return fulltimeWorker;
+    public boolean isFullTimeWorker() {
+        return fullTimeWorker;
     }
 
-    public void setFulltimeWorker(boolean fulltimeWorker) {
-        this.fulltimeWorker = fulltimeWorker;
+    public void setFullTimeWorker(boolean fullTimeWorker) {
+        this.fullTimeWorker = fullTimeWorker;
     }
 
     public void setFreeDay(DayOfWeek freeDay) {
@@ -42,11 +65,11 @@ public class Employee implements EmployeeInterface {
         this.name = name;
     }
 
-    public double getOverTimeHours() {
+    public int getOverTimeHours() {
         return overTimeHours;
     }
 
-    public void setOverTimeHours(double overTimeHours) {
+    public void setOverTimeHours(int overTimeHours) {
         this.overTimeHours = overTimeHours;
     }
 
@@ -78,9 +101,8 @@ public class Employee implements EmployeeInterface {
 
     @Override
     //method that adds all hours that go beyond the 20/40 weekly hours
-    public int overTimeCounter() {
-        /* ToDo */
-        return 0;
+    public void addOverTimeHours(int hours) {
+        this.overTimeHours += hours;
     }
 
     //all methods needed for vacation

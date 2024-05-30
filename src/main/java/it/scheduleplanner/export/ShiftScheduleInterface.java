@@ -28,4 +28,6 @@ public interface ShiftScheduleInterface {
 	 */
 	public Map<LocalDate, ShiftDayInterface> getSchedule();
 
+	ShiftDayInterface getDay(LocalDate date);
+
 }

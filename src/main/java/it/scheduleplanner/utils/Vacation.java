@@ -5,9 +5,8 @@ import java.time.Period;
 
 public class Vacation {
 
-    LocalDate vacationStart;
-    LocalDate vacationEnd;
-    Period vacation = Period.between(vacationStart, vacationEnd);
+    private LocalDate vacationStart;
+    private LocalDate vacationEnd;
     LocalDate checkingDate;
 
     public Vacation(LocalDate vacationStart, LocalDate vacationEnd) {
@@ -15,14 +14,9 @@ public class Vacation {
         this.vacationEnd = vacationEnd;
     }
 
-    public boolean  isNotOnVacation(LocalDate checkingDate) {
-        this.checkingDate = checkingDate;
 
-        if (!checkingDate.isAfter(vacationEnd) && !checkingDate.isBefore(vacationStart)) {
-            return false;
-        } else {
-            return true;
-        }
+    public boolean isOnVacation(LocalDate checkingDate) {
+        return !checkingDate.isBefore(vacationStart) && !checkingDate.isAfter(vacationEnd);
     }
 
     public LocalDate getVacationStart() {
@@ -39,5 +33,10 @@ public class Vacation {
 
     public void setVacationEnd(LocalDate vacationEnd) {
         this.vacationEnd = vacationEnd;
+    }
+
+    public void sendOnVacation(LocalDate VacationStart, LocalDate VacationEnd) {
+        this.vacationStart = VacationStart;
+        this.vacationEnd = VacationEnd;
     }
 }

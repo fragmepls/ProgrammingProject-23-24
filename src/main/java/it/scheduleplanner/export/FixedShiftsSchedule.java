@@ -32,6 +32,8 @@ public class FixedShiftsSchedule implements ShiftScheduleInterface {
 	public Map<LocalDate, ShiftDayInterface> getSchedule() {
 		return schedule;
 	}
-	
-	
+
+	public ShiftDayInterface getDay(LocalDate date) {
+		return schedule.get(date);
+	}
 }

@@ -4,9 +4,7 @@ public interface EmployeeInterface {
 
 	String getName();
 
-    int overTimeCounter();
-
-    ;
+    void addOverTimeHours(int hours);
 	
 	
 	

@@ -1,6 +1,7 @@
 package it.scheduleplanner.planner;
 
 import java.time.DayOfWeek;
+import java.util.Collections;
 import java.util.HashMap;
 
 import it.scheduleplanner.export.Shift;
@@ -18,19 +19,23 @@ public class EmployeeComparator {
 
 
         for (Employee employee : employeeList) {
-            if (employee.isFulltimeWorker()) {
+            if (employee.isFullTimeWorker()) {
                 employee.setWorkingHours(40);
-            }
-            else employee.setWorkingHours(20);
+            } else employee.setWorkingHours(20);
         }
+
+        if (date.getDayOfWeek() != DayOfWeek.MONDAY) {
+            Collections.shuffle(employeeList);
+        }
+
 
         if (date.getDayOfWeek() == DayOfWeek.MONDAY) {
             for (Employee employee : employeeList) {
-                if (employee.isFulltimeWorker()) {
+                if (employee.isFullTimeWorker()) {
                     employee.setWorkingHours(40);
-                }
-                else employee.setWorkingHours(20);
+                } else employee.setWorkingHours(20);
             }
+            Collections.shuffle(employeeList);
         }
 
         for (int i = 1; i == numberOfEmployeesPerDay; i++) {
@@ -63,8 +68,7 @@ public class EmployeeComparator {
                         if (!morningShiftAssigned) {
                             export.put(employee, Shift.MORNING);
                             morningShiftAssigned = true;
-                        }
-                        else if (!afternoonShiftAssigned) {
+                        } else if (!afternoonShiftAssigned) {
                             export.put(employee, Shift.AFTERNOON);
                             afternoonShiftAssigned = true;
                             return export;
@@ -76,14 +80,14 @@ public class EmployeeComparator {
             // Third pass: Assign missing shift to the employee with the least overtime hours
             if (!fullShiftAssigned && (!morningShiftAssigned || !afternoonShiftAssigned)) {
                 Employee employeeWithMinOvertime = null;
-                double minOvertimeHours = Double.MAX_VALUE;
+                int minOvertimeHours = Integer.MAX_VALUE;
 
                 for (Employee employee : employeeList) {
                     if (!isAvailable(employee, date)) {
                         continue;
                     }
 
-                    double currentOvertimeHours = employee.getOverTimeHours();
+                    int currentOvertimeHours = employee.getOverTimeHours();
                     if (currentOvertimeHours < minOvertimeHours) {
                         minOvertimeHours = currentOvertimeHours;
                         employeeWithMinOvertime = employee;
@@ -93,9 +97,10 @@ public class EmployeeComparator {
                 if (employeeWithMinOvertime != null) {
                     if (!morningShiftAssigned) {
                         export.put(employeeWithMinOvertime, Shift.MORNING);
-                    }
-                    else {
+                        employeeWithMinOvertime.addOverTimeHours(4);
+                    } else {
                         export.put(employeeWithMinOvertime, Shift.AFTERNOON);
+                        employeeWithMinOvertime.addOverTimeHours(4);
                     }
                     return export;
                 }
@@ -106,16 +111,15 @@ public class EmployeeComparator {
         return null;
     }
 
-    private static boolean isAvailable(Employee employee, LocalDate date) {
+    public static boolean isAvailable(Employee employee, LocalDate date) {
         DayOfWeek dayOfWeek = date.getDayOfWeek();
-//        if (!employee.isNotOnVaccation) {
-//            return false;
-//        }
-//        else {
-        if (employee.getFreeDay() == dayOfWeek) {
+        if (employee.isOnVacation(date)) {
             return false;
         }
-        else {
+        if (employee.getFreeDay() == dayOfWeek) {
+            return false;
+        } else {
+
             if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
                 if (!employee.isWeekendWorker()) {
                     return false;
