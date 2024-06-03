@@ -16,7 +16,7 @@ public class Employee implements EmployeeInterface {
     private int workingHours;
     private boolean fullTimeWorker;
     private List<Vacation> vacationList = new ArrayList<>();
-    ;
+
 
 
     //constructor for Employee - overTimeHours does not need to get taken since every employee starts at 0

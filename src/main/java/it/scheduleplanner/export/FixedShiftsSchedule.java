@@ -15,7 +15,7 @@ public class FixedShiftsSchedule implements ShiftScheduleInterface {
 	
 	/**
 	 * Constructs a new exportable schedule with the Days mapped to the Dates
-	 * @param LocalDate beginOfSchedule = first day of the schedule
+	 * @param beginOfSchedule beginOfSchedule = first day of the schedule
 	 */
 	public FixedShiftsSchedule(LocalDate beginOfSchedule) {
 		this.beginOfSchedule = beginOfSchedule;
@@ -36,4 +36,6 @@ public class FixedShiftsSchedule implements ShiftScheduleInterface {
 	public ShiftDayInterface getDay(LocalDate date) {
 		return schedule.get(date);
 	}
+
+	
 }

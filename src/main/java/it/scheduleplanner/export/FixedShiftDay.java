@@ -38,13 +38,5 @@ public class FixedShiftDay implements ShiftDayInterface {
         return employees;
     }
 
-    @Override
-    public int getEmployeeCount() {
-        int count = 0;
-        for (List<EmployeeInterface> list : employees.values()) {
-            count += list.size();
-        }
-        return count;
-    }
 
 }

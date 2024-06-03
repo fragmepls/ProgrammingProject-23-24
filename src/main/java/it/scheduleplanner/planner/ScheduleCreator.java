@@ -12,7 +12,7 @@ import static it.scheduleplanner.planner.EmployeeComparator.getNext;
 
 public class ScheduleCreator {
 
-    static ArrayList<Employee> employeeList = new ArrayList<>();
+    public static ArrayList<Employee> employeeList = new ArrayList<>();
 
     public static void addEmployee(Employee employee) {
         employeeList.add(employee);

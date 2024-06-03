@@ -32,5 +32,4 @@ public interface ShiftDayInterface {
      */
     public Map<Shift, List<EmployeeInterface>> getEmployees();
 
-    int getEmployeeCount();
 }
