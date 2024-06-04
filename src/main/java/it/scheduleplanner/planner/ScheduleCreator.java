@@ -16,7 +16,9 @@ public class ScheduleCreator {
     public static ArrayList<Employee> employeeList = new ArrayList<>();
 
     public static void addEmployee(Employee employee) {
-        employeeList.add(employee);
+    	if (!employeeList.contains(employee)) {
+            employeeList.add(employee);
+    	}
     }
 
     public static ShiftScheduleInterface create(LocalDate begin, LocalDate end, int numberOfEmployeesPerDay, boolean weekendOpen, DayOfWeek restDay) {
