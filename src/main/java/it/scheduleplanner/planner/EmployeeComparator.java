@@ -38,7 +38,7 @@ public class EmployeeComparator {
             Collections.shuffle(employeeList);
         }
 
-        for (int i = 1; i == numberOfEmployeesPerDay; i++) {
+        for (int i = 0; i < numberOfEmployeesPerDay; i++) {
             boolean fullShiftAssigned = false;
             boolean morningShiftAssigned = false;
             boolean afternoonShiftAssigned = false;

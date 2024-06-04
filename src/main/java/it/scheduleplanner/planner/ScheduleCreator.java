@@ -7,6 +7,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static it.scheduleplanner.planner.EmployeeComparator.getNext;
 
@@ -34,7 +35,7 @@ public class ScheduleCreator {
                 currentDate = currentDate.plusDays(1);
             }
         } else if (!weekendOpen) {
-            while (!currentDate.isBefore(end)) {
+            while (!currentDate.isAfter(end)) {
                 if (restDay == null || !currentDate.getDayOfWeek().equals(restDay) || !currentDate.getDayOfWeek().equals(DayOfWeek.SATURDAY) || !currentDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
                     dateList.add(currentDate);
                 }
@@ -44,10 +45,13 @@ public class ScheduleCreator {
 
 
         for (LocalDate date : dateList) {
-            Employee employee1ForThisDay = (Employee) getNext(employeeList, date, numberOfEmployeesPerDay);
-            day.addEmployee(employee1ForThisDay);
+
+            Map<Employee, Shift> currentDayCoveredShift = getNext(employeeList, date, numberOfEmployeesPerDay); //TODO error trying to cast map to employee
+            for (Employee employee : currentDayCoveredShift.keySet()) {
+                day.addEmployee(employee, currentDayCoveredShift.get(employee));
+            }
             calendar.addDay(date, day);
         }
-        return calendar;
+        return calendar; //ShiftScheduleInterface calendar.getSchedule --> returns map: dates - day
     }
 }
