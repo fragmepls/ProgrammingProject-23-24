@@ -34,6 +34,7 @@ public class EmployeeListTest {
         expectedEmployees.add(employee9);
         expectedEmployees.add(employee10);
 
+        
         // Verify that all employees are added to the ScheduleCreator's employee list
         assertEquals(expectedEmployees.size(), ScheduleCreator.employeeList.size());
         assertEquals(expectedEmployees, ScheduleCreator.employeeList);

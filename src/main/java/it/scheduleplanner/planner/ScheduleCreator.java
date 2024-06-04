@@ -34,7 +34,7 @@ public class ScheduleCreator {
                 currentDate = currentDate.plusDays(1);
             }
         } else if (!weekendOpen) {
-            while (!currentDate.isBefore(end)) {
+            while (!currentDate.isAfter(end)) {
                 if (restDay == null || !currentDate.getDayOfWeek().equals(restDay) || !currentDate.getDayOfWeek().equals(DayOfWeek.SATURDAY) || !currentDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
                     dateList.add(currentDate);
                 }
@@ -44,7 +44,11 @@ public class ScheduleCreator {
 
 
         for (LocalDate date : dateList) {
+        	
+        	System.out.println(date);
+        	
             Employee employee1ForThisDay = (Employee) getNext(employeeList, date, numberOfEmployeesPerDay);
+            
             day.addEmployee(employee1ForThisDay);
             calendar.addDay(date, day);
         }

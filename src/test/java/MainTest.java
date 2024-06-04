@@ -1,4 +1,5 @@
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -9,12 +10,14 @@ import java.util.HashMap;
 
 import it.scheduleplanner.export.*;
 import it.scheduleplanner.utils.*;
+import it.scheduleplanner.*;
+import it.scheduleplanner.planner.*;
 
 public class MainTest {
 
 	public static void main(String[] args) {
-		DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("E, yyyy-MM-dd");
-		LocalDate date = LocalDate.now();
+		/*DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("E, yyyy-MM-dd");
+		LocalDate date = LocalDate.of(2024, 05, 13);
 		String s = date.toString();
 		List<EmployeeInterface> employees= new ArrayList<>();
 		
@@ -42,7 +45,7 @@ public class MainTest {
 		calendar.addDay(date, day);
 		calendar.addDay(date.plusDays(2), day2);
 		Export.CSVExport(calendar, "/home/isaiah/Desktop/");
-		Export.employeeExport(employees, "/home/isaiah/Desktop/");
+		Export.employeeExport(employees, "/home/isaiah/Desktop/");*/
 //		System.out.println(date.getDayOfWeek());
 //		switch(date.getDayOfWeek().toString()) {
 //		case "MONDAY":
@@ -65,6 +68,58 @@ public class MainTest {
 		
 		
 	
+		// Initialize employees
+        Employee employee1 = new Employee("John", true, "monday", true);
+        Employee employee2 = new Employee("Jane", false, "tuesday", false);
+        Employee employee3 = new Employee("Jack", true, "wednesday", false);
+        Employee employee4 = new Employee("Jill", false, "friday", true);
+        Employee employee5 = new Employee("Jake", true, "saturday", false);
+        Employee employee6 = new Employee("Jess", true, "monday", true);
+        Employee employee7 = new Employee("Jerry", true, "tuesday", true);
+        Employee employee8 = new Employee("Janet", false, "monday", false);
+        Employee employee9 = new Employee("Jasmine", true, "sunday", true);
+        Employee employee10 = new Employee("James", false, "tuesday", false);
+
+        // Set up vacations
+        Vacation juneVacation1 = new Vacation(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 10));
+        Vacation juneVacation2 = new Vacation(LocalDate.of(2024, 6, 11), LocalDate.of(2024, 6, 20));
+        Vacation juneVacation3 = new Vacation(LocalDate.of(2024, 6, 21), LocalDate.of(2024, 6, 30));
+
+        employee1.addVacation(juneVacation1);
+        employee2.addVacation(juneVacation2);
+        employee3.addVacation(juneVacation1);
+        employee4.addVacation(juneVacation3);
+        employee5.addVacation(juneVacation1);
+        employee6.addVacation(juneVacation2);
+        employee7.addVacation(juneVacation2);
+
+        // Add employees to list
+        ArrayList<Employee> employeeList = new ArrayList<>();
+        employeeList.add(employee1);
+        employeeList.add(employee2);
+        employeeList.add(employee3);
+        employeeList.add(employee4);
+        employeeList.add(employee5);
+        employeeList.add(employee6);
+        employeeList.add(employee7);
+        employeeList.add(employee8);
+        employeeList.add(employee9);
+        employeeList.add(employee10);
+
+        for (Employee e : employeeList) {
+        	ScheduleCreator.addEmployee(e);
+        }
+        // Define the date and the number of employees needed per day
+        LocalDate testDate = LocalDate.of(2024, 6, 3); // A Monday
+        int numberOfEmployeesPerDay = 1;
+        
+        LocalDate beginDate = LocalDate.of(2024, 6, 1);
+        LocalDate endDate = LocalDate.of(2024, 6, 6);
+        
+        ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, false, DayOfWeek.SATURDAY);
+        System.out.println(calendar.toString());
+        Export.CSVExport(calendar, "/home/isaiah/Desktop/");
+		Export.employeeExport(ScheduleCreator.employeeList, "/home/isaiah/Desktop/");
 	}
 	
 	

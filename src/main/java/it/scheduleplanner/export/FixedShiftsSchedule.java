@@ -37,5 +37,14 @@ public class FixedShiftsSchedule implements ShiftScheduleInterface {
 		return schedule.get(date);
 	}
 
+	@Override
+	public String toString() {
+		String string = "";
+		string += beginOfSchedule.toString();
+		string += "\n";
+		string += schedule.toString();
+		return string;
+	}
+
 	
 }

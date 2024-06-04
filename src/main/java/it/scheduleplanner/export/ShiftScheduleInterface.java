@@ -30,4 +30,5 @@ public interface ShiftScheduleInterface {
 
 	ShiftDayInterface getDay(LocalDate date);
 
+	String toString();
 }

@@ -1,6 +1,6 @@
 package it.scheduleplanner.export;
 
-import it.scheduleplanner.utils.EmployeeInterface;
+import it.scheduleplanner.utils.Employee;
 import java.util.List;
 /**
  * This Interface handles the export of data and provides the necessary methods.<br>
@@ -27,12 +27,12 @@ public interface Export {
 	
 	/**
 	 * 
-	 * @param employees List<EmployeeInterface>
+	 * @param employees List<Employee>
 	 * @param pathToDirectory
 	 * @return false if an error occurred
 	 * <li> true if everything functioned
 	 */
-	public static Boolean employeeExport(List<EmployeeInterface> employees, String pathToDirectory) {
+	public static Boolean employeeExport(List<Employee> employees, String pathToDirectory) {
 		return JSONExport.employeeExport(employees, pathToDirectory);
 	}
 }

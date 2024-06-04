@@ -51,7 +51,7 @@ public class SchedulePlannerMain {
         calendar.addDay(date.plusDays(2), day2);
 
         Export.CSVExport(calendar, "");
-        Export.employeeExport(employees, "");
+    //    Export.employeeExport(employees, "");
 
         connection.close();
 

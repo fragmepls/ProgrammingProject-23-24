@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ArrayList;
 
-import it.scheduleplanner.utils.EmployeeInterface;
+import it.scheduleplanner.utils.Employee;
 
 import java.io.IOException;
 
@@ -30,7 +30,7 @@ public class CSVExport implements Export {
 	private static Map<LocalDate, ShiftDayInterface> schedule = new HashMap<>();
 	private static List<LocalDate> scheduleDates = null;
 	
-	private static Map<LocalDate, Map<Shift, List<EmployeeInterface>>> exportMap = new HashMap<LocalDate, Map<Shift,List<EmployeeInterface>>>();
+	private static Map<LocalDate, Map<Shift, List<Employee>>> exportMap = new HashMap<LocalDate, Map<Shift,List<Employee>>>();
 
 	private static List<String> fileContentList = new ArrayList<String>();
 	
@@ -195,9 +195,9 @@ public class CSVExport implements Export {
 	private static void writeWeek(LocalDate start) {
 		DateTimeFormatter formatter_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 		
-		List<EmployeeInterface> morningList = new ArrayList<EmployeeInterface>();
-		List<EmployeeInterface> afternoonList = new ArrayList<EmployeeInterface>();
-		List<EmployeeInterface> fullList = new ArrayList<EmployeeInterface>();
+		List<Employee> morningList = new ArrayList<Employee>();
+		List<Employee> afternoonList = new ArrayList<Employee>();
+		List<Employee> fullList = new ArrayList<Employee>();
 		
 		int maxMorning = 0;
 		int morningLines = 1;
