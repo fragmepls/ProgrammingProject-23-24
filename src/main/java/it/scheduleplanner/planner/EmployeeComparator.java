@@ -11,104 +11,117 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Map;
 
-
 public class EmployeeComparator {
 
     public static Map<Employee, Shift> getNext(ArrayList<Employee> employeeList, LocalDate date, int numberOfEmployeesPerDay) {
         Map<Employee, Shift> export = new HashMap<>();
 
-
         for (Employee employee : employeeList) {
             if (employee.isFullTimeWorker()) {
                 employee.setWorkingHours(40);
-            } else employee.setWorkingHours(20);
+            } else {
+                employee.setWorkingHours(20);
+            }
         }
 
         if (date.getDayOfWeek() != DayOfWeek.MONDAY) {
             Collections.shuffle(employeeList);
-        }
-
-
-        if (date.getDayOfWeek() == DayOfWeek.MONDAY) {
+        } else {
             for (Employee employee : employeeList) {
                 if (employee.isFullTimeWorker()) {
                     employee.setWorkingHours(40);
-                } else employee.setWorkingHours(20);
+                } else {
+                    employee.setWorkingHours(20);
+                }
             }
             Collections.shuffle(employeeList);
         }
 
-        for (int i = 0; i < numberOfEmployeesPerDay; i++) {
-            boolean fullShiftAssigned = false;
-            boolean morningShiftAssigned = false;
-            boolean afternoonShiftAssigned = false;
+        int employeesAssigned = 0;
 
-            // First pass: Try to assign a FULL shift or both MORNING and AFTERNOON shifts
-            for (Employee employee1 : employeeList) {
-                if (!isAvailable(employee1, date)) {
-                    continue;
-                }
+        while (employeesAssigned < numberOfEmployeesPerDay) {
+            boolean shiftAssigned = false;
 
-                if ((employee1.getWorkingHours() * 100) - 8 >= 0) {
-                    export.clear();
-                    export.put(employee1, Shift.FULL);
-                    fullShiftAssigned = true;
-                    return export;
+            // Assign FULL shifts
+            shiftAssigned = assignShifts(employeeList, export, date, Shift.FULL, 8, numberOfEmployeesPerDay - employeesAssigned);
+            employeesAssigned += countAssignedShifts(export, Shift.FULL);
+
+            // Assign MORNING and AFTERNOON shifts
+            if (employeesAssigned < numberOfEmployeesPerDay) {
+                shiftAssigned = assignShifts(employeeList, export, date, Shift.MORNING, 4, numberOfEmployeesPerDay - employeesAssigned) ||
+                        assignShifts(employeeList, export, date, Shift.AFTERNOON, 4, numberOfEmployeesPerDay - employeesAssigned);
+                employeesAssigned += countAssignedShifts(export, Shift.MORNING) + countAssignedShifts(export, Shift.AFTERNOON);
+            }
+
+            // Assign remaining shifts to employees with the least overtime hours
+            if (employeesAssigned < numberOfEmployeesPerDay) {
+                shiftAssigned = assignRemainingShift(employeeList, export, date, employeesAssigned);
+                if (shiftAssigned) {
+                    employeesAssigned++;
                 }
             }
 
-            // Second pass: Try to assign MORNING and AFTERNOON shifts if FULL shift is not assigned
-            if (!fullShiftAssigned) {
-                for (Employee employee : employeeList) {
-                    if (!isAvailable(employee, date)) {
-                        continue;
-                    }
-
-                    if ((employee.getWorkingHours() * 100) - 4 >= 0) {
-                        if (!morningShiftAssigned) {
-                            export.put(employee, Shift.MORNING);
-                            morningShiftAssigned = true;
-                        } else if (!afternoonShiftAssigned) {
-                            export.put(employee, Shift.AFTERNOON);
-                            afternoonShiftAssigned = true;
-                            return export;
-                        }
-                    }
-                }
+            // If no employees were assigned during this pass, we cannot fulfill the required number of employees
+            if (!shiftAssigned) {
+                break;
             }
-
-            // Third pass: Assign missing shift to the employee with the least overtime hours
-            if (!fullShiftAssigned && (!morningShiftAssigned || !afternoonShiftAssigned)) {
-                Employee employeeWithMinOvertime = null;
-                int minOvertimeHours = Integer.MAX_VALUE;
-
-                for (Employee employee : employeeList) {
-                    if (!isAvailable(employee, date)) {
-                        continue;
-                    }
-
-                    int currentOvertimeHours = employee.getOverTimeHours();
-                    if (currentOvertimeHours < minOvertimeHours) {
-                        minOvertimeHours = currentOvertimeHours;
-                        employeeWithMinOvertime = employee;
-                    }
-                }
-
-                if (employeeWithMinOvertime != null) {
-                    if (!morningShiftAssigned) {
-                        export.put(employeeWithMinOvertime, Shift.MORNING);
-                        employeeWithMinOvertime.addOverTimeHours(4);
-                    } else {
-                        export.put(employeeWithMinOvertime, Shift.AFTERNOON);
-                        employeeWithMinOvertime.addOverTimeHours(4);
-                    }
-                    return export;
-                }
-            }
-
-            return export.isEmpty() ? null : export;
         }
-        return null;
+
+        return export;
+    }
+
+    private static boolean assignShifts(ArrayList<Employee> employeeList, Map<Employee, Shift> export, LocalDate date, Shift shift, int requiredHours, int limit) {
+        int assignedCount = 0;
+        for (Employee employee : employeeList) {
+            if (!isAvailable(employee, date)) {
+                continue;
+            }
+
+            if (employee.getWorkingHours() >= requiredHours && assignedCount < limit) {
+                export.put(employee, shift);
+                employee.setWorkingHours(employee.getWorkingHours() - requiredHours);
+                assignedCount++;
+                if (assignedCount >= limit) {
+                    return true;
+                }
+            }
+        }
+        return assignedCount > 0;
+    }
+
+    private static int countAssignedShifts(Map<Employee, Shift> export, Shift shift) {
+        int count = 0;
+        for (Shift assignedShift : export.values()) {
+            if (assignedShift == shift) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static boolean assignRemainingShift(ArrayList<Employee> employeeList, Map<Employee, Shift> export, LocalDate date, int employeesAssigned) {
+        Employee employeeWithMinOvertime = null;
+        int minOvertimeHours = Integer.MAX_VALUE;
+
+        for (Employee employee : employeeList) {
+            if (!isAvailable(employee, date)) {
+                continue;
+            }
+
+            int currentOvertimeHours = employee.getOverTimeHours();
+            if (currentOvertimeHours < minOvertimeHours) {
+                minOvertimeHours = currentOvertimeHours;
+                employeeWithMinOvertime = employee;
+            }
+        }
+
+        if (employeeWithMinOvertime != null) {
+            export.put(employeeWithMinOvertime, employeesAssigned % 2 == 0 ? Shift.MORNING : Shift.AFTERNOON);
+            employeeWithMinOvertime.addOverTimeHours(4);
+            return true;
+        }
+
+        return false;
     }
 
     public static boolean isAvailable(Employee employee, LocalDate date) {
@@ -119,7 +132,6 @@ public class EmployeeComparator {
         if (employee.getFreeDay() == dayOfWeek) {
             return false;
         } else {
-
             if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
                 if (!employee.isWeekendWorker()) {
                     return false;
@@ -128,8 +140,4 @@ public class EmployeeComparator {
             return true;
         }
     }
-
 }
-
-
-

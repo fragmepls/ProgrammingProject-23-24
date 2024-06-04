@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Map;
 
+import static it.scheduleplanner.planner.ScheduleCreator.employeeList;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EmployeeComparatorTest {
@@ -74,5 +75,28 @@ public class EmployeeComparatorTest {
         System.out.println("Assigned Employee: " + assignedEmployee.getName() + ", Shift: " + assignedShift);
 
         // Additional assertions can be added as needed
+    }
+    @Test
+    void testMorningShiftAssignment() {
+        LocalDate date = LocalDate.of(2023, 6, 5); // Set a specific date
+
+        // Assume we need 2 employees per day
+        int numberOfEmployeesPerDay = 2;
+
+        // Call the method
+        Map<Employee, Shift> result = EmployeeComparator.getNext(employeeList, date, numberOfEmployeesPerDay);
+
+        // Assert the results
+        assertNotNull(result, "The result should not be null");
+        assertEquals(numberOfEmployeesPerDay, result.size(), "The number of assigned employees should be correct");
+
+        // Check if one of the employees is assigned to the MORNING shift
+        boolean morningShiftAssigned = result.values().contains(Shift.MORNING);
+        assertTrue(morningShiftAssigned, "At least one employee should be assigned to the MORNING shift");
+
+        // Optionally print the result to manually verify the output
+        result.forEach((employee, shift) -> {
+            System.out.println(employee.getName() + " is assigned to " + shift);
+        });
     }
 }
