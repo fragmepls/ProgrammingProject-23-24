@@ -21,7 +21,6 @@ public class ScheduleCreator {
 
     public static ShiftScheduleInterface create(LocalDate begin, LocalDate end, int numberOfEmployeesPerDay, boolean weekendOpen, DayOfWeek restDay) {
         ShiftScheduleInterface calendar = new FixedShiftsSchedule(begin);
-        ShiftDayInterface day = new FixedShiftDay();
 
         List<LocalDate> dateList = new ArrayList<>();
         // Loop from begin to end date (inclusive) and add all days, where shifts are needed.
@@ -46,6 +45,7 @@ public class ScheduleCreator {
 
         for (LocalDate date : dateList) {
 
+            ShiftDayInterface day = new FixedShiftDay();
             Map<Employee, Shift> currentDayCoveredShift = getNext(employeeList, date, numberOfEmployeesPerDay); //TODO error trying to cast map to employee
             for (Employee employee : currentDayCoveredShift.keySet()) {
                 day.addEmployee(employee, currentDayCoveredShift.get(employee));
