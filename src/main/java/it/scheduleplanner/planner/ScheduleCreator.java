@@ -50,6 +50,8 @@ public class ScheduleCreator {
             for (Employee employee : currentDayCoveredShift.keySet()) {
                 day.addEmployee(employee, currentDayCoveredShift.get(employee));
             }
+        	
+        	System.out.println(date);
             calendar.addDay(date, day);
         }
         return calendar; //ShiftScheduleInterface calendar.getSchedule --> returns map: dates - day

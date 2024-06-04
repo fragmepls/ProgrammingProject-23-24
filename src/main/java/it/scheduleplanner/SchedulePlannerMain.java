@@ -49,23 +49,10 @@ public class SchedulePlannerMain {
             System.out.println(entry.getKey() + " : " + entry.getValue());
         }
 
-        //ShiftDayInterface day1 = new FixedShiftDay();
-        //ShiftDayInterface day2 = new FixedShiftDay();
 
-        //day1.addEmployee(employee1);
-        //day1.addEmployee(employee2);
-        //day1.addEmployee(employee3);
-        //day1.addEmployee(employee4, Shift.AFTERNOON);
-        //day2.addEmployee(employee5, Shift.MORNING);
-        //day2.addEmployee(employee6, Shift.MORNING);
+      //  Export.CSVExport(calendar, "");
+    //    Export.employeeExport(employees, "");
 
-        //FixedShiftsSchedule calendar = new FixedShiftsSchedule(date.minusDays(10));
-
-        //calendar.addDay(date, day1);
-        //calendar.addDay(date.plusDays(2), day2);
-
-        //Export.CSVExport(calendar, "/Users/noahthanei/Desktop");
-        //Export.employeeExport(employees, "/Users/noahthanei/Desktop");
 
         connection.close();
 
