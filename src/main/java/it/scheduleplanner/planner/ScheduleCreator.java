@@ -44,14 +44,13 @@ public class ScheduleCreator {
 
 
         for (LocalDate date : dateList) {
-
             ShiftDayInterface day = new FixedShiftDay();
+            
             Map<Employee, Shift> currentDayCoveredShift = getNext(employeeList, date, numberOfEmployeesPerDay); //TODO error trying to cast map to employee
             for (Employee employee : currentDayCoveredShift.keySet()) {
                 day.addEmployee(employee, currentDayCoveredShift.get(employee));
             }
         	
-        	System.out.println(date);
             calendar.addDay(date, day);
         }
         return calendar; //ShiftScheduleInterface calendar.getSchedule --> returns map: dates - day
