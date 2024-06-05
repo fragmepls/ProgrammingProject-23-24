@@ -1,7 +1,10 @@
 package it.scheduleplanner.export;
 
 import it.scheduleplanner.utils.Employee;
+
 import java.util.List;
+import java.util.Set;
+
 /**
  * This Interface handles the export of data and provides the necessary methods.<br>
  * All possible actions are indicated by the methods.

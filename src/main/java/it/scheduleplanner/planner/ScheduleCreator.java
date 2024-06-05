@@ -5,19 +5,17 @@ import it.scheduleplanner.utils.Employee;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static it.scheduleplanner.planner.EmployeeComparator.getNext;
 
 public class ScheduleCreator {
 
-    public static ArrayList<Employee> employeeList = new ArrayList<>();
+    public static Set<Employee> employeeSet = new HashSet<>();
 
     public static void addEmployee(Employee employee) {
-    	if (!employeeList.contains(employee)) {
-            employeeList.add(employee);
+    	if (!employeeSet.contains(employee)) {
+            employeeSet.add(employee);
     	}
     }
     //returns a calendar - consits out of
@@ -27,7 +25,7 @@ public class ScheduleCreator {
 
         for (LocalDate date : dateList) {
             ShiftDayInterface day = new FixedShiftDay();
-            Map<Employee, Shift> currentDayCoveredShift = getNext(employeeList, date, numberOfEmployeesPerDay);
+            Map<Employee, Shift> currentDayCoveredShift = getNext(employeeSet, date, numberOfEmployeesPerDay);
             for (Employee employee : currentDayCoveredShift.keySet()) {
                 day.addEmployee(employee, currentDayCoveredShift.get(employee));
             }

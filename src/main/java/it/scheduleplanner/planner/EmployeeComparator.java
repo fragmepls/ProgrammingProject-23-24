@@ -1,63 +1,55 @@
 package it.scheduleplanner.planner;
 
 import java.time.DayOfWeek;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
 import it.scheduleplanner.export.Shift;
 import it.scheduleplanner.utils.Employee;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Map;
 
 public class EmployeeComparator {
 
-    public static Map<Employee, Shift> getNext(ArrayList<Employee> employeeList, LocalDate date, int numberOfEmployeesPerDay) {
+    public static Map<Employee, Shift> getNext(Set<Employee> employeeSet, LocalDate date, int numberOfEmployeesPerDay) {
         Map<Employee, Shift> export = new HashMap<>();
+        Set<Employee> employeeSetShuffeld = employeeSet;
 
-        for (Employee employee : employeeList) {
-            if (employee.isFullTimeWorker()) {
-                employee.setWorkingHours(40);
-            } else {
-                employee.setWorkingHours(20);
-            }
+        /* every monday all employees that are full time workers get 40 working hours that they should work during this week and
+        * every halftime workers get 20 working hours that they should work during this week.
+        * In addition, every Monday the Set of employees gets sorted randomly so that not always the same workers get the same shifts
+         */
+        if (date.getDayOfWeek() == DayOfWeek.MONDAY) {
+            assignWorkingHoursToEmployee(employeeSet);
+            employeeSetShuffeld = sortRandomlyEmployees(employeeSet);
+        }
+        /* if the calendar start not with a monday we have to ensure that there are available employees until monday:
+        *
+        */
+
+        //Remove all past vacations that are over
+        LocalDate currentDate = LocalDate.now();
+
+        // Iterate through all employees and remove expired vacations
+        for (Employee employee : employeeSet) {
+            employee.removeExpiredVacations(currentDate);
         }
 
-        if (date.getDayOfWeek() != DayOfWeek.MONDAY) {
-            Collections.shuffle(employeeList);
-        } else {
-            for (Employee employee : employeeList) {
-                if (employee.isFullTimeWorker()) {
-                    employee.setWorkingHours(40);
-                } else {
-                    employee.setWorkingHours(20);
-                }
-            }
-            Collections.shuffle(employeeList);
-        }
+        //ensures that always exactly the needed employees per day get added
+        int coveredShifts = 0;
 
-        int employeesAssigned = 0;
-
-        while (employeesAssigned < numberOfEmployeesPerDay) {
+        while (coveredShifts < numberOfEmployeesPerDay) {
             boolean shiftAssigned = false;
 
             // Assign FULL shifts
-            shiftAssigned = assignShifts(employeeList, export, date, Shift.FULL, 8, numberOfEmployeesPerDay - employeesAssigned);
-            employeesAssigned += countAssignedShifts(export, Shift.FULL);
+            shiftAssigned = assignShifts(employeeSetShuffeld, export, date,numberOfEmployeesPerDay - coveredShifts);
+            coveredShifts = export.size();
 
-            // Assign MORNING and AFTERNOON shifts
-            if (employeesAssigned < numberOfEmployeesPerDay) {
-                shiftAssigned = assignShifts(employeeList, export, date, Shift.MORNING, 4, numberOfEmployeesPerDay - employeesAssigned) ||
-                        assignShifts(employeeList, export, date, Shift.AFTERNOON, 4, numberOfEmployeesPerDay - employeesAssigned);
-                employeesAssigned += countAssignedShifts(export, Shift.MORNING) + countAssignedShifts(export, Shift.AFTERNOON);
-            }
 
             // Assign remaining shifts to employees with the least overtime hours
-            if (employeesAssigned < numberOfEmployeesPerDay) {
-                shiftAssigned = assignRemainingShift(employeeList, export, date, employeesAssigned);
+            if (coveredShifts < numberOfEmployeesPerDay) {
+                shiftAssigned = assignRemainingShift(employeeSetShuffeld, export, date, coveredShifts);
                 if (shiftAssigned) {
-                    employeesAssigned++;
+                    coveredShifts++;
                 }
             }
 
@@ -70,17 +62,58 @@ public class EmployeeComparator {
         return export;
     }
 
-    private static boolean assignShifts(ArrayList<Employee> employeeList, Map<Employee, Shift> export, LocalDate date, Shift shift, int requiredHours, int limit) {
+
+    private static void assignWorkingHoursToEmployee(Set<Employee> employeeSet) {
+        for (Employee employee : employeeSet) {
+            if (employee.isFullTimeWorker()) {
+                employee.setWorkingHours(40);
+            } else {
+                employee.setWorkingHours(20);
+            }
+        }
+    }
+
+    private static Set<Employee> sortRandomlyEmployees(Set<Employee> employeeSet) {
+        //make out of the set a list i order to shuffle the employees
+        ArrayList <Employee> employeeList = new ArrayList<>(employeeSet);
+        Collections.shuffle(employeeList);
+        return new HashSet<>(employeeList);
+    }
+
+
+    private static boolean assignShifts(Set<Employee> employeeSet, Map<Employee, Shift> export, LocalDate date, int limit) {
         int assignedCount = 0;
-        for (Employee employee : employeeList) {
+        boolean morningShiftAssigned = false;
+        for (Employee employee : employeeSet) {
             if (!isAvailable(employee, date)) {
                 continue;
             }
 
-            if (employee.getWorkingHours() >= requiredHours && assignedCount < limit) {
-                export.put(employee, shift);
-                employee.setWorkingHours(employee.getWorkingHours() - requiredHours);
+            if (employee.getWorkingHours() >= 8 && assignedCount < limit) {
+                export.put(employee, Shift.FULL);
+                employee.setWorkingHours(employee.getWorkingHours() - 8);
                 assignedCount++;
+
+            } else if (employee.getWorkingHours() < 8 && employee.getWorkingHours() >= 4 && assignedCount < limit) {
+                if (!morningShiftAssigned) {
+                    export.put(employee, Shift.MORNING);
+                    employee.setWorkingHours(employee.getWorkingHours() - 4);
+                    morningShiftAssigned = true;
+                }
+            }
+        }
+
+        // Assign afternoon shifts for employees with remaining hours after morning shift
+        if (morningShiftAssigned) {
+            for (Employee otherEmployee : employeeSet) {
+                if (!isAvailable(otherEmployee, date)) {
+                    continue;
+                }
+                if (otherEmployee.getWorkingHours() >= 4) {
+                    export.put(otherEmployee, Shift.AFTERNOON);
+                    otherEmployee.setWorkingHours(otherEmployee.getWorkingHours() - 4);
+                    assignedCount++;
+                }
                 if (assignedCount >= limit) {
                     return true;
                 }
@@ -89,21 +122,16 @@ public class EmployeeComparator {
         return assignedCount > 0;
     }
 
-    private static int countAssignedShifts(Map<Employee, Shift> export, Shift shift) {
-        int count = 0;
-        for (Shift assignedShift : export.values()) {
-            if (assignedShift == shift) {
-                count++;
-            }
-        }
-        return count;
-    }
 
-    private static boolean assignRemainingShift(ArrayList<Employee> employeeList, Map<Employee, Shift> export, LocalDate date, int employeesAssigned) {
+
+    private static int countAssignedShifts(Map<Employee, Shift> export) {
+        return export.size(); // Simply count the total number of assigned shifts
+    }
+    private static boolean assignRemainingShift(Set<Employee> employeeSet, Map<Employee, Shift> export, LocalDate date, int employeesAssigned) {
         Employee employeeWithMinOvertime = null;
         int minOvertimeHours = Integer.MAX_VALUE;
 
-        for (Employee employee : employeeList) {
+        for (Employee employee : employeeSet) {
             if (!isAvailable(employee, date)) {
                 continue;
             }
@@ -126,6 +154,7 @@ public class EmployeeComparator {
 
     public static boolean isAvailable(Employee employee, LocalDate date) {
         DayOfWeek dayOfWeek = date.getDayOfWeek();
+
         if (employee.isOnVacation(date)) {
             return false;
         }

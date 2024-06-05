@@ -34,6 +34,21 @@ public class Employee implements EmployeeInterface {
         vacationList.add(vacation);
     }
 
+    public void removeExpiredVacations(LocalDate currentDate) {
+        // Create a list to store the vacations to be removed
+        List<Vacation> vacationsToRemove = new ArrayList<>();
+
+        // Iterate through the vacationList and identify the expired vacations
+        for (Vacation vacation : vacationList) {
+            if (vacation.getVacationEnd().isBefore(currentDate)) {
+                vacationsToRemove.add(vacation);
+            }
+        }
+
+        // Remove the expired vacations from the vacationList
+        vacationList.removeAll(vacationsToRemove);
+    }
+
     // Method to check if the employee is on vacation on a specific date
     public boolean isOnVacation(LocalDate date) {
         for (Vacation vacation : vacationList) {

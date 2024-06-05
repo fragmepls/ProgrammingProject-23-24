@@ -42,26 +42,27 @@ public class ScheduleCreatorTest {
     @Test
     public void testCreateSchedule() {
         // Add some mock employees
-        Employee emp1 = new Employee("John Doe", true, "monday", false);
-        Employee emp2 = new Employee("Jane Smith", false, "TUESDAY", false);
+        Employee emp1 = new Employee("Doe", true, "monday", false);
+        Employee emp2 = new Employee("Smith", false, "TUESDAY", false);
         Employee employee3 = new Employee("Jack", true, "wednesday", false);
         Employee employee4 = new Employee("Jill", false, "friday", false);
-        Employee employee5 = new Employee("Jake", true, "saturday", false);
-        Employee employee6 = new Employee("Jess", true, "monday", false);
-        Employee employee7 = new Employee("Jerry", true, "tuesday", false);
-        Employee employee8 = new Employee("Janet", false, "monday", false);
-        Employee employee9 = new Employee("Jasmine", true, "sunday", false);
-        Employee employee10 = new Employee("James", false, "tuesday", false);
+        Employee employee5 = new Employee("Bob", true, "saturday", false);
+        Employee employee6 = new Employee("Katherine", false, "sunday", false);
+        Employee employee7 = new Employee("Jason", true, "monday", false);
+        Employee employee8 = new Employee("Jan", false, "tuesday", false);
+        Employee employee9 = new Employee("Lara", true, "saturday", false);
+        Employee employee10 = new Employee("Sara", false, "wednesday", false);
+
 
 
 
         LocalDate begin = LocalDate.of(2024, 6, 1); // June 1, 2024
         LocalDate end = LocalDate.of(2024, 6, 7);   // June 7, 2024
 
-        ShiftScheduleInterface schedule = ScheduleCreator.create(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 7), 5, true, null);
+        ShiftScheduleInterface schedule = ScheduleCreator.create(LocalDate.of(2024, 6, 10), LocalDate.of(2024, 6, 17), 3, true, null);
         System.out.println(schedule.toString());
 
-        schedule = ScheduleCreator.create(LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 7), 5, false, DayOfWeek.WEDNESDAY);
+        schedule = ScheduleCreator.create(LocalDate.of(2024, 6, 10), LocalDate.of(2024, 6, 17), 3, true, null);
         System.out.println(schedule.toString());
     }
 }

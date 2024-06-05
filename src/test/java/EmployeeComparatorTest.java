@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Map;
 
-import static it.scheduleplanner.planner.ScheduleCreator.employeeList;
+import static it.scheduleplanner.planner.ScheduleCreator.employeeSet;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EmployeeComparatorTest {
@@ -58,7 +58,7 @@ public class EmployeeComparatorTest {
         int numberOfEmployeesPerDay = 1;
 
         // Call the getNext method
-        Map<Employee, Shift> result = EmployeeComparator.getNext(employeeList, testDate, numberOfEmployeesPerDay);
+        Map<Employee, Shift> result = EmployeeComparator.getNext(employeeSet, testDate, numberOfEmployeesPerDay);
 
         // Assert the results
         assertNotNull(result);
@@ -84,7 +84,7 @@ public class EmployeeComparatorTest {
         int numberOfEmployeesPerDay = 2;
 
         // Call the method
-        Map<Employee, Shift> result = EmployeeComparator.getNext(employeeList, date, numberOfEmployeesPerDay);
+        Map<Employee, Shift> result = EmployeeComparator.getNext(employeeSet, date, numberOfEmployeesPerDay);
 
         // Assert the results
         assertNotNull(result, "The result should not be null");
