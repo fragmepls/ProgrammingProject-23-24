@@ -119,7 +119,7 @@ public class MainTest {
         ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, false, DayOfWeek.SATURDAY);
         System.out.println(calendar.toString());
         Export.CSVExport(calendar, "/home/isaiah/Desktop/");
-		Export.employeeExport((ArrayList) ScheduleCreator.employeeSet, "/home/isaiah/Desktop/");
+		Export.employeeExport(ScheduleCreator.employeeSet, "/home/isaiah/Desktop/");
 	}
 	
 	

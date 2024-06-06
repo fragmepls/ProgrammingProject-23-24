@@ -35,7 +35,7 @@ public interface Export {
 	 * @return false if an error occurred
 	 * <li> true if everything functioned
 	 */
-	public static Boolean employeeExport(List<Employee> employees, String pathToDirectory) {
+	public static Boolean employeeExport(Set<Employee> employees, String pathToDirectory) {
 		return JSONExport.employeeExport(employees, pathToDirectory);
 	}
 }
