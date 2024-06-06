@@ -111,7 +111,7 @@ public class MainTest {
         }
         // Define the date and the number of employees needed per day
         LocalDate testDate = LocalDate.of(2024, 6, 3); // A Monday
-        int numberOfEmployeesPerDay = 1;
+        int numberOfEmployeesPerDay = 2;
         
         LocalDate beginDate = LocalDate.of(2024, 6, 1);
         LocalDate endDate = LocalDate.of(2024, 6, 6);
