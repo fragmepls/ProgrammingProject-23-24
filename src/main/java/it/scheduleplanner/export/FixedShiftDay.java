@@ -15,7 +15,7 @@ public class FixedShiftDay implements ShiftDayInterface {
     private Map<Shift, List<Employee>> employees = new HashMap<>();
 
     /**
-     * basic Constructor for FixedShiftDay
+     * Basic constructor for FixedShiftDay
      */
     public FixedShiftDay() {
         employees.put(Shift.MORNING, new ArrayList<>());
@@ -23,20 +23,37 @@ public class FixedShiftDay implements ShiftDayInterface {
         employees.put(Shift.FULL, new ArrayList<>());
     }
 
+    @Override
     public void addEmployee(Employee employee) {
         employees.get(Shift.FULL).add(employee);
     }
 
+    @Override
     public void addEmployee(Employee employee, Shift shift) {
-        if (shift.equals(Shift.HALF)) {
+        if (shift == Shift.HALF) {
             shift = Shift.MORNING;
         }
         employees.get(shift).add(employee);
     }
 
+    @Override
     public Map<Shift, List<Employee>> getEmployees() {
         return employees;
     }
 
-
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Shift, List<Employee>> entry : employees.entrySet()) {
+            sb.append(entry.getKey().toString()).append(": ");
+            for (Employee employee : entry.getValue()) {
+                sb.append(employee.getName()).append(", ");
+            }
+            if (!entry.getValue().isEmpty()) {
+                sb.setLength(sb.length() - 2); // Remove the last comma and space
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
 }

@@ -1,7 +1,7 @@
 package it.scheduleplanner.export;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import it.scheduleplanner.utils.Employee;
 
@@ -19,7 +19,7 @@ public class JSONExport {
 	
 	private static ObjectMapper mapper = new ObjectMapper();
 	
-	protected static Boolean employeeExport(List<Employee> employees, String pathToDirectory){
+	protected static Boolean employeeExport(Set<Employee> employees, String pathToDirectory){
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		
 		String file = createFile("employees_" + LocalDate.now().toString(), pathToDirectory);

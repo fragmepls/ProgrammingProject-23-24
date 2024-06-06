@@ -1,7 +1,10 @@
 package it.scheduleplanner.export;
 
 import it.scheduleplanner.utils.Employee;
+
 import java.util.List;
+import java.util.Set;
+
 /**
  * This Interface handles the export of data and provides the necessary methods.<br>
  * All possible actions are indicated by the methods.
@@ -32,7 +35,7 @@ public interface Export {
 	 * @return false if an error occurred
 	 * <li> true if everything functioned
 	 */
-	public static Boolean employeeExport(List<Employee> employees, String pathToDirectory) {
+	public static Boolean employeeExport(Set<Employee> employees, String pathToDirectory) {
 		return JSONExport.employeeExport(employees, pathToDirectory);
 	}
 }

@@ -5,27 +5,38 @@ import it.scheduleplanner.utils.Employee;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static it.scheduleplanner.planner.EmployeeComparator.getNext;
 
 public class ScheduleCreator {
 
-    public static ArrayList<Employee> employeeList = new ArrayList<>();
+    public static Set<Employee> employeeSet = new HashSet<>();
 
     public static void addEmployee(Employee employee) {
-    	if (!employeeList.contains(employee)) {
-            employeeList.add(employee);
+    	if (!employeeSet.contains(employee)) {
+            employeeSet.add(employee);
     	}
     }
-
+    //returns a calendar - consits out of
     public static ShiftScheduleInterface create(LocalDate begin, LocalDate end, int numberOfEmployeesPerDay, boolean weekendOpen, DayOfWeek restDay) {
         ShiftScheduleInterface calendar = new FixedShiftsSchedule(begin);
+        List<LocalDate> dateList = generateDateList(begin, end, weekendOpen, restDay);
 
+        for (LocalDate date : dateList) {
+            ShiftDayInterface day = new FixedShiftDay();
+            Map<Employee, Shift> currentDayCoveredShift = getNext(employeeSet, date, numberOfEmployeesPerDay);
+            for (Employee employee : currentDayCoveredShift.keySet()) {
+                day.addEmployee(employee, currentDayCoveredShift.get(employee));
+            }
+            calendar.addDay(date, day);
+        }
+        return calendar;
+    }
+
+
+    public static List<LocalDate> generateDateList(LocalDate begin, LocalDate end, boolean weekendOpen, DayOfWeek restDay) {
         List<LocalDate> dateList = new ArrayList<>();
-        // Loop from begin to end date (inclusive) and add all days, where shifts are needed.
         LocalDate currentDate = begin;
 
         if (weekendOpen) {
@@ -35,26 +46,16 @@ public class ScheduleCreator {
                 }
                 currentDate = currentDate.plusDays(1);
             }
-        } else if (!weekendOpen) {
+        } else {
             while (!currentDate.isAfter(end)) {
-                if (restDay == null || !currentDate.getDayOfWeek().equals(restDay) || !currentDate.getDayOfWeek().equals(DayOfWeek.SATURDAY) || !currentDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+                DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
+                if ((restDay == null || !dayOfWeek.equals(restDay)) && dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
                     dateList.add(currentDate);
                 }
                 currentDate = currentDate.plusDays(1);
             }
         }
-
-
-        for (LocalDate date : dateList) {
-            ShiftDayInterface day = new FixedShiftDay();
-            
-            Map<Employee, Shift> currentDayCoveredShift = getNext(employeeList, date, numberOfEmployeesPerDay); //TODO error trying to cast map to employee
-            for (Employee employee : currentDayCoveredShift.keySet()) {
-                day.addEmployee(employee, currentDayCoveredShift.get(employee));
-            }
-        	
-            calendar.addDay(date, day);
-        }
-        return calendar; //ShiftScheduleInterface calendar.getSchedule --> returns map: dates - day
+        return dateList;
     }
+
 }
