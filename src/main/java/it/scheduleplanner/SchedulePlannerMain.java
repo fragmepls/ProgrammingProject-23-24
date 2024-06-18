@@ -3,17 +3,16 @@ package it.scheduleplanner;
 import it.scheduleplanner.dbutils.DBUtils;
 import it.scheduleplanner.dbutils.SQLQueries;
 import it.scheduleplanner.export.*;
-import it.scheduleplanner.planner.EmployeeComparator;
 import it.scheduleplanner.planner.ScheduleCreator;
 import it.scheduleplanner.utils.Employee;
-import it.scheduleplanner.utils.EmployeeInterface;
+import it.scheduleplanner.utils.Vacation;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Scanner;
 
 public class SchedulePlannerMain {
 
@@ -21,41 +20,58 @@ public class SchedulePlannerMain {
         DBUtils.initializeDatabase();
         Connection connection = DBUtils.getConnection();
 
-        ArrayList<Employee> employees = new ArrayList<>();
-        LocalDate date = LocalDate.now();
+        ArrayList<Employee> employeeList = new ArrayList<>();
+        Scanner scanner = new Scanner(System.in);
 
-        Employee employee1 = SQLQueries.selectEmployeeById(connection, 1);
-        employees.add(employee1);
-        Employee employee2 = SQLQueries.selectEmployeeById(connection, 2);
-        employees.add(employee2);
-        Employee employee3 = SQLQueries.selectEmployeeById(connection, 3);
-        employees.add(employee3);
-        Employee employee4 = SQLQueries.selectEmployeeById(connection, 4);
-        employees.add(employee4);
-        Employee employee5 = SQLQueries.selectEmployeeById(connection, 5);
-        employees.add(employee5);
-        Employee employee6 = SQLQueries.selectEmployeeById(connection, 6);
-        employees.add(employee6);
+        System.out.print("Enter the number of employees: ");
+        int numberOfEmployees = scanner.nextInt();
+        scanner.nextLine();
 
-        for (Employee employee : employees) {
-            ScheduleCreator.addEmployee(employee);
+        for (int i = 0; i < numberOfEmployees; i++) {
+            System.out.println("Enter details for employee " + (i + 1) + ":");
+            System.out.print("Name: ");
+            String name = scanner.nextLine();
+            System.out.print("Is Weekend Worker (true/false): ");
+            boolean isWeekendWorker = scanner.nextBoolean();
+            scanner.nextLine();
+            System.out.print("Free Day: ");
+            String freeDay = scanner.nextLine();
+            System.out.print("Is Full Time (true/false): ");
+            boolean isFullTime = scanner.nextBoolean();
+            scanner.nextLine();
+
+            Employee employee = new Employee(name, isWeekendWorker, freeDay, isFullTime);
+            SQLQueries.insertEmployee(connection, employee);
+            employeeList.add(employee);
+
+            System.out.println("Enter vacation details for " + name + ":");
+            System.out.print("Start Date (YYYY-MM-DD): ");
+            LocalDate startDate = LocalDate.parse(scanner.nextLine());
+            System.out.print("End Date (YYYY-MM-DD): ");
+            LocalDate endDate = LocalDate.parse(scanner.nextLine());
+
+            Vacation vacation = new Vacation(startDate, endDate);
+            employee.addVacation(vacation);
         }
 
-        ShiftScheduleInterface shift = ScheduleCreator.create(LocalDate.now(), LocalDate.of(2024, 7, 30), 2, false, DayOfWeek.SUNDAY);
-
-        System.out.println(shift.getSchedule().size());
-
-        for (Map.Entry<LocalDate, ShiftDayInterface> entry : shift.getSchedule().entrySet()) {
-            System.out.println(entry.getKey() + " : " + entry.getValue());
+        for (Employee e : employeeList) {
+            ScheduleCreator.addEmployee(e);
         }
 
+        System.out.print("Enter number of employees per day: ");
+        int numberOfEmployeesPerDay = scanner.nextInt();
+        scanner.nextLine();
 
-      //  Export.CSVExport(calendar, "");
-    //    Export.employeeExport(employees, "");
+        System.out.print("Enter begin date (YYYY-MM-DD): ");
+        LocalDate beginDate = LocalDate.parse(scanner.nextLine());
+        System.out.print("Enter end date (YYYY-MM-DD): ");
+        LocalDate endDate = LocalDate.parse(scanner.nextLine());
 
+        ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, false, DayOfWeek.SATURDAY);
+        System.out.println(calendar);
+        Export.CSVExport(calendar, "C:\\Users\\leoob\\Desktop");
+        Export.employeeExport(ScheduleCreator.employeeSet, "C:\\Users\\leoob\\Desktop");
 
-        connection.close();
-
+        DBUtils.closeConnection(connection);
     }
-
 }
