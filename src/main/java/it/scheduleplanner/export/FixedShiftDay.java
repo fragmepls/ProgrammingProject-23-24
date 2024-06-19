@@ -23,6 +23,7 @@ public class FixedShiftDay implements ShiftDayInterface {
         employees.put(Shift.FULL, new ArrayList<>());
     }
 
+    
     @Override
     public void addEmployee(Employee employee) {
         employees.get(Shift.FULL).add(employee);
@@ -41,6 +42,7 @@ public class FixedShiftDay implements ShiftDayInterface {
         return employees;
     }
 
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

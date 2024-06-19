@@ -2,7 +2,6 @@ package it.scheduleplanner.export;
 
 import it.scheduleplanner.utils.Employee;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,10 +11,12 @@ import java.util.Set;
 public interface Export {
 
 	/**
-	 * Exports the schedule to a CSV file stored in the directory indicated by the path.
+	 * This method exports a FixedShiftsSchedule to a CSV File located in the indicated directory.<br>
+	 * The CSV File will be named 'date of begin of schedule'.csv. In case a file with this name already exists, an increasing number will be added to the beginning of the name.<br>
+	 * The name will then look like this: ('Nr.')date.csv
 	 * 
-	 * @param ShiftScheduleInterface schedule
-	 * @param String pathToDirectory
+	 * @param schedule Schedule of type ShifScheduleInterface
+	 * @param pathToDirectory String describing the path to the desired directory
 	 * <br><br>
 	 * @return false if schedule is not exportable
 	 * <li>true if the schedule is exportable
@@ -29,9 +30,11 @@ public interface Export {
 	}
 	
 	/**
+	 * This method may be primarily used for debug purposes but can also be used to get an overview over all the employees.<br>
+	 * It exports a JSON file containing all the necessary information bound to every Employee.
 	 * 
-	 * @param employees List<Employee>
-	 * @param pathToDirectory
+	 * @param employees Set of Employees to be exported
+	 * @param pathToDirectory String describing the path to the desired directory
 	 * @return false if an error occurred
 	 * <li> true if everything functioned
 	 */

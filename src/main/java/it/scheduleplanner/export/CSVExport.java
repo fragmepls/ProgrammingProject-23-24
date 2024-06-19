@@ -40,11 +40,14 @@ public class CSVExport implements Export {
 	private static LocalDate endOfExport = null;
 	
 	/**
-	 * This method exports a FixedShiftsSchedule to a CSV File located in the indicated directory.
-	 * @param scheduleToExport
-	 * @param pathToDirectory
+	 * This method exports a FixedShiftsSchedule to a CSV File located in the indicated directory.<br>
+	 * The CSV File will be named 'date of begin of schedule'.csv. In case a file with this name already exists, an increasing number will be added to the beginning of the name.<br>
+	 * The name will then look like this: ('Nr.')date.csv
+	 * 
+	 * @param scheduleToExport Schedule of type ShifScheduleInterface
+	 * @param pathToDirectory String describing the path to the desired directory
 	 */
-	public static void simpleScheduleExport(ShiftScheduleInterface scheduleToExport, String pathToDirectory){
+	protected static void simpleScheduleExport(ShiftScheduleInterface scheduleToExport, String pathToDirectory){
 		initPredefinedLines();
 		initVariables(scheduleToExport);
 		
@@ -241,7 +244,7 @@ public class CSVExport implements Export {
 		//calculating the needed amount of lines for the whole week to have a symmetric layout
 		lines = Integer.max(morningLines + afternoonLines + 1, fullLines) + 2;
 		
-//		TODO ausfuehrlich testen und log
+
 		
 		//Array of length lines needed for the week
 		String[] content = new String[lines];

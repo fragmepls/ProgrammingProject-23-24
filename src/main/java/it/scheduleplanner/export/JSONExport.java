@@ -10,8 +10,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -19,6 +17,15 @@ public class JSONExport {
 	
 	private static ObjectMapper mapper = new ObjectMapper();
 	
+	/**
+	 * This method may be primarily used for debug purposes but can also be used to get an overview over all the employees.<br>
+	 * It exports a JSON file containing all the necessary information bound to every Employee.
+	 * 
+	 * @param employees Set of Employees to be exported
+	 * @param pathToDirectory String describing the path to the desired directory
+	 * @return false if an error occurred
+	 * <li> true if everything functioned
+	 */
 	protected static Boolean employeeExport(Set<Employee> employees, String pathToDirectory){
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		
@@ -64,27 +71,7 @@ public class JSONExport {
 			//TODO log
 			e.printStackTrace();
 		}
-//		fileNew = pathToDirectory + file;
-//		int i = 1; //variable to alter filename
-//		try {
-//		    while (true) {
-//		    	if (!Files.exists(Path.of(fileNew))) { //if file doesn't already exist
-//		    		System.out.println("create file: " + fileNew);
-//		    		Files.createFile(Path.of(fileNew)); //create file
-//		    		// TODO log
-//		    		return fileNew; //return path to file
-//			    } 
-//			    else { //file already exists
-//			    	//add prefix to file
-//			    	fileNew = pathToDirectory + "(" + i + ")" + file;
-//			    	i++;
-//				}
-//			}
-//		} 
-//		catch (IOException e) {
-//			//TODO log
-//			e.printStackTrace();
-//		}
+		
 		return null;
 	}
 	
