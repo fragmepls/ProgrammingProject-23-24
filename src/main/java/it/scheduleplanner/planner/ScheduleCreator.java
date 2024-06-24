@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.util.*;
 
 import static it.scheduleplanner.planner.EmployeeComparator.getNext;
+import static it.scheduleplanner.planner.EmployeeComparator.assignWorkingHoursToEmployee;
+
 
 public class ScheduleCreator {
 
@@ -20,20 +22,31 @@ public class ScheduleCreator {
     }
     //returns a calendar - consits out of
     public static ShiftScheduleInterface create(LocalDate begin, LocalDate end, int numberOfEmployeesPerDay, boolean weekendOpen, DayOfWeek restDay) {
+        //initialize the working hours for the case the schedule begins not with a monday
+        assignWorkingHoursToEmployee(employeeSet);
         ShiftScheduleInterface calendar = new FixedShiftsSchedule(begin);
         List<LocalDate> dateList = generateDateList(begin, end, weekendOpen, restDay);
 
         for (LocalDate date : dateList) {
             ShiftDayInterface day = new FixedShiftDay();
-            Map<Employee, Shift> currentDayCoveredShift = getNext(employeeSet, date, numberOfEmployeesPerDay);
+            Map<Employee, Shift> currentDayCoveredShift = getNext(employeeSet, date, numberOfEmployeesPerDay, restDay);
             for (Employee employee : currentDayCoveredShift.keySet()) {
                 day.addEmployee(employee, currentDayCoveredShift.get(employee));
             }
             calendar.addDay(date, day);
         }
+        printOvertimeHours(employeeSet);
         return calendar;
     }
 
+
+    private static void printOvertimeHours(Set<Employee> employeeSet) {
+        for (Employee employee : employeeSet) {
+            if (employee.getOverTimeHours() > 0) {
+                System.out.println(employee.getOverTimeHours());
+            }
+        }
+    }
 
     public static List<LocalDate> generateDateList(LocalDate begin, LocalDate end, boolean weekendOpen, DayOfWeek restDay) {
         List<LocalDate> dateList = new ArrayList<>();
