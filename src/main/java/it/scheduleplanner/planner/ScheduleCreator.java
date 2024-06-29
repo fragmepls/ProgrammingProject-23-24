@@ -16,9 +16,19 @@ public class ScheduleCreator {
     public static Set<Employee> employeeSet = new HashSet<>();
 
     public static void addEmployee(Employee employee) {
-    	if (!employeeSet.contains(employee)) {
+        if (!employeeSet.contains(employee)) {
             employeeSet.add(employee);
-    	}
+        }
+    }
+
+    public static void removeEmployee(Employee employee) {
+        employeeSet.remove(employee);
+    }
+
+    public static void addEmployeeList(ArrayList<Employee> employees) {
+        for (Employee employee : employees) {
+            addEmployee(employee);
+        }
     }
     //returns a calendar - consits out of
     public static ShiftScheduleInterface create(LocalDate begin, LocalDate end, int numberOfEmployeesPerDay, boolean weekendOpen, DayOfWeek restDay) {

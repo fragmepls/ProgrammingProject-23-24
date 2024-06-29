@@ -76,7 +76,7 @@ public class ScheduleCreatorTest2 {
         ScheduleCreator.addEmployee(new Employee("Lara", true, "SATURDAY", false));
         ScheduleCreator.addEmployee(new Employee("Sara", false, "WEDNESDAY", false));
 
-        ShiftScheduleInterface schedule = ScheduleCreator.create(begin, end, 3, false, null);
+        ShiftScheduleInterface schedule = ScheduleCreator.create(begin, end, 6, false, null);
         printSchedule(schedule);
     }
 

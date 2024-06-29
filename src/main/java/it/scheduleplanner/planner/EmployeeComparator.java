@@ -9,26 +9,25 @@ import it.scheduleplanner.utils.Employee;
 
 public class EmployeeComparator {
 
-        public static Map<Employee, Shift> getNext(Set<Employee> employeeSet, LocalDate date, int numberOfEmployeesPerDay, DayOfWeek restDay) {
-            Map<Employee, Shift> fullDayExport = new HashMap<>();
-            Map<Employee, Shift> morningExport = new HashMap<>();
-            Map<Employee, Shift> afternoonExport = new HashMap<>();
-            Map<Employee, Shift> overtimeExport = new HashMap<>();
-            List<Employee> employeeList = new ArrayList<>(employeeSet);
+    public static Map<Employee, Shift> getNext(Set<Employee> employeeSet, LocalDate date, int numberOfEmployeesPerDay, DayOfWeek restDay) {
+        Map<Employee, Shift> fullDayExport = new HashMap<>();
+        Map<Employee, Shift> morningExport = new HashMap<>();
+        Map<Employee, Shift> afternoonExport = new HashMap<>();
+        Map<Employee, Shift> overtimeExport = new HashMap<>();
+        List<Employee> employeeList = new ArrayList<>(employeeSet);
 
-            // Add working hours and shuffle all employees on Monday, if Monday is restDay then on Tuesday
-            if (restDay == null || !restDay.equals(DayOfWeek.MONDAY)) {
-                if (date.getDayOfWeek() == DayOfWeek.MONDAY) {
-                    assignWorkingHoursToEmployee(employeeSet);
-                    Collections.shuffle(employeeList); // Shuffle employees for randomness
-                }
-            } else {
-                if (date.getDayOfWeek() == DayOfWeek.TUESDAY) {
-                    assignWorkingHoursToEmployee(employeeSet);
-                    Collections.shuffle(employeeList); // Shuffle employees for randomness
-                }
+        // Add working hours and shuffle all employees on Monday, if Monday is restDay then on Tuesday
+        if (restDay == null || !restDay.equals(DayOfWeek.MONDAY)) {
+            if (date.getDayOfWeek() == DayOfWeek.MONDAY) {
+                assignWorkingHoursToEmployee(employeeSet);
+                Collections.shuffle(employeeList); // Shuffle employees for randomness
             }
-
+        } else {
+            if (date.getDayOfWeek() == DayOfWeek.TUESDAY) {
+                assignWorkingHoursToEmployee(employeeSet);
+                Collections.shuffle(employeeList); // Shuffle employees for randomness
+            }
+        }
 
 
         removePastVacations(employeeSet);
@@ -37,6 +36,7 @@ public class EmployeeComparator {
 
         List<Employee> availableEmployeesForCurrentDay = new ArrayList<>(employeeList);
         List<Employee> availableEmployeesForAfternoon = new ArrayList<>(employeeList);
+        List<Employee> availableEmployeesForOvertime = new ArrayList<>(employeeList);
 
         for (Employee employee : employeeList) {
             if (coveredShifts == numberOfEmployeesPerDay) break;
@@ -49,6 +49,7 @@ public class EmployeeComparator {
                 employee.setWorkingHours(employee.getWorkingHours() - 8);
                 availableEmployeesForCurrentDay.remove(employee);
                 availableEmployeesForAfternoon.remove(employee);
+                availableEmployeesForOvertime.remove(employee);
                 coveredShifts++;
             }
         }
@@ -64,6 +65,7 @@ public class EmployeeComparator {
                     morningExport.put(employee, Shift.MORNING);
                     employee.setWorkingHours(employee.getWorkingHours() - 4);
                     availableEmployeesForAfternoon.remove(employee);
+                    availableEmployeesForOvertime.remove(employee);
                     //search an employee for afternoon shift
                     for (Employee afternoonEmployee : availableEmployeesForAfternoon) {
 
@@ -71,6 +73,7 @@ public class EmployeeComparator {
                             afternoonExport.put(afternoonEmployee, Shift.AFTERNOON);
                             afternoonShiftAssigned = true;
                             afternoonEmployee.setWorkingHours(employee.getWorkingHours() - 4);
+                            availableEmployeesForOvertime.remove(afternoonEmployee);
                         }
                         if (afternoonShiftAssigned) {
 
