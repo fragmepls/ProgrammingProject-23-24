@@ -325,7 +325,9 @@ public class Gui2 extends Application {
                     return;
                 }
 
-                ScheduleCreator.addEmployeeList((ArrayList<Employee>) employeeList);
+                ArrayList<Employee> arrayList = new ArrayList<>(employeeList);
+
+                ScheduleCreator.addEmployeeList(arrayList);
 
                 ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, false, DayOfWeek.SATURDAY);
                 System.out.println(calendar);
