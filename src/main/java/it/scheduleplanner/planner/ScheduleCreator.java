@@ -13,8 +13,14 @@ import static it.scheduleplanner.planner.EmployeeComparator.assignWorkingHoursTo
 
 public class ScheduleCreator {
 
+    // Set to hold all employees
     public static Set<Employee> employeeSet = new HashSet<>();
 
+    /**
+     * Adds an employee to the employeeSet if they are not already present.
+     *
+     * @param employee The employee to be added.
+     */
     public static void addEmployee(Employee employee) {
         if (!employeeSet.contains(employee)) {
             employeeSet.add(employee);
@@ -31,12 +37,24 @@ public class ScheduleCreator {
         }
     }
     //returns a calendar - consits out of
+
+    /**
+     * Creates a shift schedule for a specified period.
+     *
+     * @param begin The start date of the schedule.
+     * @param end The end date of the schedule.
+     * @param numberOfEmployeesPerDay The number of employees required per day.
+     * @param weekendOpen A flag indicating if weekends are considered working days.
+     * @param restDay The designated rest day for employees.
+     * @return The generated shift schedule.
+     */
     public static ShiftScheduleInterface create(LocalDate begin, LocalDate end, int numberOfEmployeesPerDay, boolean weekendOpen, DayOfWeek restDay) {
-        //initialize the working hours for the case the schedule begins not with a monday
+        // Initialize working hours if the schedule doesn't start on a Monday
         assignWorkingHoursToEmployee(employeeSet);
         ShiftScheduleInterface calendar = new FixedShiftsSchedule(begin);
         List<LocalDate> dateList = generateDateList(begin, end, weekendOpen, restDay);
 
+        // Iterate through each date in the generated date list
         for (LocalDate date : dateList) {
             ShiftDayInterface day = new FixedShiftDay();
             Map<Employee, Shift> currentDayCoveredShift = getNext(employeeSet, date, numberOfEmployeesPerDay, restDay);
@@ -45,11 +63,16 @@ public class ScheduleCreator {
             }
             calendar.addDay(date, day);
         }
+        // Print overtime hours for all employees
         printOvertimeHours(employeeSet);
         return calendar;
     }
 
-
+    /**
+     * Prints the overtime hours for each employee.
+     *
+     * @param employeeSet The set of employees to process.
+     */
     private static void printOvertimeHours(Set<Employee> employeeSet) {
         for (Employee employee : employeeSet) {
             if (employee.getOverTimeHours() > 0) {
@@ -58,10 +81,20 @@ public class ScheduleCreator {
         }
     }
 
+    /**
+     * Generates a list of dates for the scheduling period, excluding rest days and weekends if applicable.
+     *
+     * @param begin The start date.
+     * @param end The end date.
+     * @param weekendOpen A flag indicating if weekends are considered working days.
+     * @param restDay The designated rest day.
+     * @return A list of dates to be included in the schedule.
+     */
     public static List<LocalDate> generateDateList(LocalDate begin, LocalDate end, boolean weekendOpen, DayOfWeek restDay) {
         List<LocalDate> dateList = new ArrayList<>();
         LocalDate currentDate = begin;
 
+        // Generate date list including weekends if applicable
         if (weekendOpen) {
             while (!currentDate.isAfter(end)) {
                 if (restDay == null || !currentDate.getDayOfWeek().equals(restDay)) {
@@ -70,6 +103,7 @@ public class ScheduleCreator {
                 currentDate = currentDate.plusDays(1);
             }
         } else {
+            // Generate date list excluding weekends
             while (!currentDate.isAfter(end)) {
                 DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
                 if ((restDay == null || !dayOfWeek.equals(restDay)) && dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
