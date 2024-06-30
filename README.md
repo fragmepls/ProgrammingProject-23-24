@@ -35,11 +35,13 @@ The ScheduleCreator class is used to generate and manage shift schedules for a s
 
 **Add Employees**: Use the addEmployee method in ScheduleCreator to add employees to the scheduling pool.
 
-**Create Schedule**: Use the create method in ScheduleCreator to generate a schedule,           specifying start and end dates, number of employees per day, and rest day preferences.
+**Create Schedule**: Use the create method in ScheduleCreator to generate a schedule,specifying start and end dates, number of employees per day, and rest day preferences.
 
 **View Schedule**: The generated schedule contains assigned shifts for each employee per day, ensuring proper coverage based on the specified criteria.
 
 This system is designed to help organizations manage employee schedules efficiently, ensuring coverage while respecting individual employee preferences and limitations.
+
+
 
 **Programming Techniques:** The topics covered during the lessons which where quite useful for me where : "Objects and Classes" and  "Abstract Data Types".
 
