@@ -204,6 +204,12 @@ public class Gui2 extends Application {
         }
 
         Scene scene = new Scene(vbox, 400, 300);
+
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(vbox);
+        scrollPane.setFitToWidth(true); // Enable horizontal scroll if needed
+        scrollPane.setFitToHeight(true); // Enable vertical scroll
+
         employeeListStage.setScene(scene);
         employeeListStage.initOwner(primaryStage);
         employeeListStage.show();
@@ -367,8 +373,9 @@ public class Gui2 extends Application {
             }
         });
 
-
-
+        // Button to show employees and overtime hours
+        Button showEmployeesButton = new Button("Check overtime hours");
+        showEmployeesButton.setOnAction(e -> showEmployeesAndOvertime());
 
         vbox.getChildren().addAll(
                 new Label("Enter Schedule Configuration:"),
@@ -379,11 +386,40 @@ public class Gui2 extends Application {
                 restDayComboBox,
                 chooseDirectoryButton,
                 directoryLabel,
-                generateScheduleButton
+                generateScheduleButton,
+                showEmployeesButton
         );
         tab.setContent(vbox);
         return tab;
     }
+
+    /**
+     * Shows a new window displaying employees and their overtime hours.
+     */
+    private void showEmployeesAndOvertime() {
+        Stage employeeOvertimeStage = new Stage();
+        employeeOvertimeStage.setTitle("Employees and Overtime Hours");
+
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10, 10, 10, 10));
+
+        // Example logic to print employees and overtime hours
+        for (Employee employee : employeeList) {
+            String employeeInfo = employee.getName() + ": " + employee.getOverTimeHours() + " hours overtime";
+            vbox.getChildren().add(new Label(employeeInfo));
+        }
+
+        // Create a ScrollPane and set VBox as its content
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(vbox);
+        scrollPane.setFitToWidth(true); // Enable horizontal scroll if needed
+        scrollPane.setFitToHeight(true); // Enable vertical scroll
+
+        Scene scene = new Scene(scrollPane, 400, 300); // Adjust size as needed
+        employeeOvertimeStage.setScene(scene);
+        employeeOvertimeStage.show();
+    }
+
 
     /**
      * Displays an alert with a given title and message.

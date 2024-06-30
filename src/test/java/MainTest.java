@@ -15,7 +15,7 @@ import it.scheduleplanner.planner.*;
 
 public class MainTest {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InsufficientEmployeesException {
 		/*DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("E, yyyy-MM-dd");
 		LocalDate date = LocalDate.of(2024, 05, 13);
 		String s = date.toString();

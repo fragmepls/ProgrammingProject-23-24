@@ -125,7 +125,8 @@ This system is designed to help organizations manage employee schedules efficien
 - `Gui2`: Brings all the methods from the different classes together and creates a simple, but functional graphical user Interface.
 
 **Third-Party libraries used:**
-- JavaFX
+- JavaFX for GUI
+- 
 
 **Programming techniques used:**
 - I've used different techniques learned in the lectures, where they were useful. But we tried to keep the code - especially in the methods defined in the classes of the planner package - as simple as possible and tried to work a lot with simpler techniques such as for loops, since for some of our group (including me) it's the first bigger programming-project.
