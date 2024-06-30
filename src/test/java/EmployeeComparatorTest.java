@@ -1,4 +1,5 @@
 import it.scheduleplanner.planner.EmployeeComparator;
+import it.scheduleplanner.planner.InsufficientEmployeesException;
 import it.scheduleplanner.utils.Employee;
 import it.scheduleplanner.export.Shift;
 import it.scheduleplanner.utils.Vacation;
@@ -11,17 +12,25 @@ import java.util.Map;
 import static it.scheduleplanner.planner.ScheduleCreator.employeeSet;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit test for the EmployeeComparator.getNext method.
+ */
 public class EmployeeComparatorTest {
 
+    /**
+     * Test case for the EmployeeComparator.getNext method.
+     *
+     * @throws InsufficientEmployeesException If there are not enough employees available.
+     */
     @Test
-    void testGetNext() {
+    void testGetNext() throws InsufficientEmployeesException {
         // Initialize employees
         Employee employee1 = new Employee("John", true, "monday", true);
         Employee employee2 = new Employee("Jane", false, "tuesday", false);
         Employee employee3 = new Employee("Jack", true, "wednesday", false);
         Employee employee4 = new Employee("Jill", false, "friday", true);
         Employee employee5 = new Employee("Jake", true, "saturday", false);
-        Employee employee6 = new Employee("Jess", true, "monday", true);
+        Employee employee6 = new Employee("Jess", true, "wednesday", true);
         Employee employee7 = new Employee("Jerry", true, "tuesday", true);
         Employee employee8 = new Employee("Janet", false, "monday", false);
         Employee employee9 = new Employee("Jasmine", true, "sunday", true);

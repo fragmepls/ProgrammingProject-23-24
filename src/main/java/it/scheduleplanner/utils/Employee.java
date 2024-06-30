@@ -7,33 +7,50 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Employee implements EmployeeInterface {
+/**
+ * Represents an employee with various attributes such as name, overtime hours,
+ * weekend working status, free day, working hours, full-time status, and vacation list.
+ */
+public class Employee {
 
     private String name;
-    private int overTimeHours = 0; //starts always from 0 - not in constructor needed
+    private int overTimeHours = 0; // Starts always from 0 - not in constructor needed
     private boolean weekendWorker;
     private DayOfWeek freeDay;
     private int workingHours;
     private boolean fullTimeWorker;
     private List<Vacation> vacationList = new ArrayList<>();
 
-
-
-    //constructor for Employee - overTimeHours does not need to get taken since every employee starts at 0
+    /**
+     * Constructs an Employee object with the specified attributes.
+     *
+     * @param name the name of the employee
+     * @param weekendWorker whether the employee works on weekends
+     * @param freeDay the free day of the employee
+     * @param fullTimeWorker whether the employee is a full-time worker
+     */
     public Employee(String name, boolean weekendWorker, String freeDay, boolean fullTimeWorker) {
         this.name = name;
-        this.freeDay = DayOfWeek.valueOf(freeDay.toUpperCase());
         this.weekendWorker = weekendWorker;
         this.fullTimeWorker = fullTimeWorker;
+        this.freeDay = DayOfWeek.valueOf(freeDay.toUpperCase());
         ScheduleCreator.addEmployee(this);
     }
 
-
-    // Method to add a vacation
+    /**
+     * Adds a vacation to the employee's vacation list.
+     *
+     * @param vacation the vacation to add
+     */
     public void addVacation(Vacation vacation) {
         vacationList.add(vacation);
     }
 
+    /**
+     * Removes expired vacations from the employee's vacation list based on the current date.
+     *
+     * @param currentDate the current date to compare with vacation end dates
+     */
     public void removeExpiredVacations(LocalDate currentDate) {
         // Create a list to store the vacations to be removed
         List<Vacation> vacationsToRemove = new ArrayList<>();
@@ -49,7 +66,12 @@ public class Employee implements EmployeeInterface {
         vacationList.removeAll(vacationsToRemove);
     }
 
-    // Method to check if the employee is on vacation on a specific date
+    /**
+     * Checks if the employee is on vacation on a specific date.
+     *
+     * @param date the date to check
+     * @return true if the employee is on vacation on the specified date, false otherwise
+     */
     public boolean isOnVacation(LocalDate date) {
         for (Vacation vacation : vacationList) {
             if (vacation.isOnVacation(date)) {
@@ -59,66 +81,75 @@ public class Employee implements EmployeeInterface {
         return false;
     }
 
-    //all getters and setters here
+    /**
+     * Returns the name of the employee.
+     *
+     * @return the name of the employee
+     */
     public String getName() {
         return name;
     }
 
-
-    public void setFreeDay(DayOfWeek freeDay) {
-        this.freeDay = freeDay;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    /**
+     * Returns the overtime hours of the employee.
+     *
+     * @return the overtime hours of the employee
+     */
     public int getOverTimeHours() {
         return overTimeHours;
     }
 
-    public void setOverTimeHours(int overTimeHours) {
-        this.overTimeHours = overTimeHours;
-    }
-
+    /**
+     * Returns whether the employee works on weekends.
+     *
+     * @return true if the employee works on weekends, false otherwise
+     */
     public boolean isWeekendWorker() {
         return weekendWorker;
     }
 
-    public void setWeekendWorker(boolean weekendWorker) {
-        this.weekendWorker = weekendWorker;
-    }
-
+    /**
+     * Returns the free day of the employee.
+     *
+     * @return the free day of the employee
+     */
     public DayOfWeek getFreeDay() {
         return freeDay;
     }
 
-    public void setFreeDay(String freeDay) {
-        this.freeDay = DayOfWeek.valueOf(freeDay);
-    }
-
+    /**
+     * Returns the working hours of the employee.
+     *
+     * @return the working hours of the employee
+     */
     public int getWorkingHours() {
         return workingHours;
-
     }
 
+    /**
+     * Sets the working hours of the employee.
+     *
+     * @param workingHours the working hours to set
+     */
     public void setWorkingHours(int workingHours) {
         this.workingHours = workingHours;
     }
 
-
-    @Override
-    //method that adds all hours that go beyond the 20/40 weekly hours
+    /**
+     * Adds overtime hours to the employee's total overtime hours.
+     *
+     * @param hours the number of overtime hours to add
+     */
     public void addOverTimeHours(int hours) {
         this.overTimeHours += hours;
     }
 
-
+    /**
+     * Returns whether the employee is a full-time worker.
+     *
+     * @return true if the employee is a full-time worker, false otherwise
+     */
     public boolean isFullTimeWorker() {
         return fullTimeWorker;
-    }
-
-    public void setFullTimeWorker(boolean fullTimeWorker) {
-        this.fullTimeWorker = fullTimeWorker;
     }
 }

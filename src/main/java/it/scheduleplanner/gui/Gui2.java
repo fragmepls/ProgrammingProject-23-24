@@ -4,6 +4,7 @@ import it.scheduleplanner.dbutils.DBUtils;
 import it.scheduleplanner.dbutils.SQLQueries;
 import it.scheduleplanner.export.Export;
 import it.scheduleplanner.export.ShiftScheduleInterface;
+import it.scheduleplanner.planner.InsufficientEmployeesException;
 import it.scheduleplanner.planner.ScheduleCreator;
 import it.scheduleplanner.utils.Employee;
 import it.scheduleplanner.utils.Vacation;
@@ -26,20 +27,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Main GUI class for the Schedule Planner application.
+ */
 public class Gui2 extends Application {
 
     private Connection connection;
     private ObservableList<Employee> employeeList = FXCollections.observableArrayList();
     private String outputDirectory;
 
-    private static final List<String> VALID_DAYS = Arrays.asList(
-            "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
-    );
-
+    /**
+     * Main method to launch the application.
+     *
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Starts the primary stage (main window) of the application.
+     *
+     * @param primaryStage The primary stage.
+     * @throws SQLException If a database access error occurs.
+     */
     @Override
     public void start(Stage primaryStage) throws SQLException {
         DBUtils.initializeDatabase();
@@ -66,7 +77,12 @@ public class Gui2 extends Application {
         primaryStage.show();
     }
 
-    /*
+    /**
+     * Creates the Employee tab.
+     *
+     * @param primaryStage The primary stage.
+     * @return The Employee tab.
+     */
     private Tab createEmployeeTab(Stage primaryStage) {
         Tab tab = new Tab("Add Employee");
         VBox vbox = new VBox(10);
@@ -76,8 +92,10 @@ public class Gui2 extends Application {
 
         CheckBox weekendWorkerCheckBox = new CheckBox("Is Weekend Worker");
 
-        TextField freeDayField = new TextField();
-        freeDayField.setPromptText("Free Day");
+        ComboBox<String> freeDayComboBox = new ComboBox<>();
+        freeDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values())
+                .map(DayOfWeek::toString)
+                .toList());
 
         CheckBox fullTimeCheckBox = new CheckBox("Is Full Time");
 
@@ -85,10 +103,10 @@ public class Gui2 extends Application {
         addButton.setOnAction(e -> {
             String name = nameField.getText();
             boolean isWeekendWorker = weekendWorkerCheckBox.isSelected();
-            String freeDay = freeDayField.getText();
+            String freeDay = freeDayComboBox.getValue();
             boolean isFullTime = fullTimeCheckBox.isSelected();
 
-            if (name.isEmpty() || freeDay.isEmpty() || !VALID_DAYS.contains(freeDay.toLowerCase())) {
+            if (name.isEmpty() || freeDay == null) {
                 showAlert("Input Error", "Some of the inputs are wrong, try again.");
                 return;
             }
@@ -103,113 +121,26 @@ public class Gui2 extends Application {
 
             nameField.clear();
             weekendWorkerCheckBox.setSelected(false);
-            freeDayField.clear();
             fullTimeCheckBox.setSelected(false);
         });
 
         Button viewEmployeesButton = new Button("View Employees");
         viewEmployeesButton.setOnAction(e -> showEmployeeList(primaryStage));
-
-
-        vbox.getChildren().addAll(new Label("Enter Employee Name:"), nameField, weekendWorkerCheckBox, freeDayField, fullTimeCheckBox, addButton, viewEmployeesButton);
-        tab.setContent(vbox);
-        return tab;
-    }
-
-
-*/
-    private Tab createEmployeeTab(Stage primaryStage) {
-        Tab tab = new Tab("Add Employee");
-        VBox vbox = new VBox(10);
-
-        TextField nameField = new TextField();
-        nameField.setPromptText("Name");
-
-        CheckBox weekendWorkerCheckBox = new CheckBox("Is Weekend Worker");
-
-        TextField freeDayField = new TextField();
-        freeDayField.setPromptText("Free Day");
-
-        CheckBox fullTimeCheckBox = new CheckBox("Is Full Time");
-
-        Button addButton = new Button("Add Employee");
-        addButton.setOnAction(e -> {
-            String name = nameField.getText();
-            boolean isWeekendWorker = weekendWorkerCheckBox.isSelected();
-            String freeDay = freeDayField.getText();
-            boolean isFullTime = fullTimeCheckBox.isSelected();
-
-            if (name.isEmpty() || freeDay.isEmpty() || !VALID_DAYS.contains(freeDay.toLowerCase())) {
-                showAlert("Input Error", "Some of the inputs are wrong, try again.");
-                return;
-            }
-
-            Employee employee = new Employee(name, isWeekendWorker, freeDay, isFullTime);
-            employeeList.add(employee);
-            try {
-                SQLQueries.insertEmployee(connection, employee);
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-
-            nameField.clear();
-            weekendWorkerCheckBox.setSelected(false);
-            freeDayField.clear();
-            fullTimeCheckBox.setSelected(false);
-        });
-
-        Button viewEmployeesButton = new Button("View Employees");
-        viewEmployeesButton.setOnAction(e -> showEmployeeList(primaryStage));
-
-        ComboBox<Employee> employeeComboBox = new ComboBox<>(employeeList);
-        employeeComboBox.setCellFactory(param -> new ListCell<>() {
-            @Override
-            protected void updateItem(Employee employee, boolean empty) {
-                super.updateItem(employee, empty);
-                if (empty || employee == null || employee.getName() == null) {
-                    setText(null);
-                } else {
-                    setText(employee.getName());
-                }
-            }
-        });
-
-        employeeComboBox.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(Employee employee, boolean empty) {
-                super.updateItem(employee, empty);
-                if (empty || employee == null || employee.getName() == null) {
-                    setText(null);
-                } else {
-                    setText(employee.getName());
-                }
-            }
-        });
-
-        Button removeButton = new Button("Remove Employee");
-        removeButton.setOnAction(e -> {
-            Employee selectedEmployee = employeeComboBox.getValue();
-            if (selectedEmployee != null) {
-                employeeList.remove(selectedEmployee);
-         /*       try {
-                    SQLQueries.removeEmployee(connection, selectedEmployee);
-                } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
-                }
-
-          */
-            }
-        });
 
         vbox.getChildren().addAll(
                 new Label("Enter Employee Name:"), nameField, weekendWorkerCheckBox,
-                freeDayField, fullTimeCheckBox, addButton, viewEmployeesButton,
-                new Label("Select Employee to Remove:"), employeeComboBox, removeButton
+                new Label("Select a fixed free Day:"),
+                freeDayComboBox, fullTimeCheckBox, addButton, viewEmployeesButton
         );
         tab.setContent(vbox);
         return tab;
     }
 
+    /**
+     * Displays the list of employees in a new window.
+     *
+     * @param primaryStage The primary stage.
+     */
     private void showEmployeeList(Stage primaryStage) {
         Stage employeeListStage = new Stage();
         employeeListStage.setTitle("Employee List");
@@ -227,6 +158,11 @@ public class Gui2 extends Application {
         employeeListStage.show();
     }
 
+    /**
+     * Creates the Vacation tab.
+     *
+     * @return The Vacation tab.
+     */
     private Tab createVacationTab() {
         Tab tab = new Tab("Send Employee on Vacation");
         VBox vbox = new VBox(10);
@@ -275,6 +211,11 @@ public class Gui2 extends Application {
                 return;
             }
 
+            if (startDate.isAfter(endDate)) {
+                showAlert("Input Error", "Start date cannot be after end date.");
+                return;
+            }
+
             Vacation vacation = new Vacation(startDate, endDate);
             employee.addVacation(vacation);
 
@@ -287,6 +228,12 @@ public class Gui2 extends Application {
         return tab;
     }
 
+    /**
+     * Creates the Schedule Configuration tab.
+     *
+     * @param primaryStage The primary stage.
+     * @return The Schedule Configuration tab.
+     */
     private Tab createScheduleTab(Stage primaryStage) {
         Tab tab = new Tab("Schedule Configuration");
         VBox vbox = new VBox(10);
@@ -299,6 +246,15 @@ public class Gui2 extends Application {
 
         DatePicker endDatePicker = new DatePicker();
         endDatePicker.setPromptText("End Date");
+
+        CheckBox weekendOpenCheckBox = new CheckBox("Open on Weekends");
+
+        ComboBox<String> restDayComboBox = new ComboBox<>();
+        restDayComboBox.getItems().add("NO DAY");
+        restDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values())
+                .map(DayOfWeek::toString)
+                .toList());
+        restDayComboBox.setPromptText("Select Rest Day");
 
         Button chooseDirectoryButton = new Button("Choose Output Directory");
         Label directoryLabel = new Label("No directory chosen");
@@ -319,17 +275,26 @@ public class Gui2 extends Application {
                 int numberOfEmployeesPerDay = Integer.parseInt(employeesPerDayField.getText());
                 LocalDate beginDate = beginDatePicker.getValue();
                 LocalDate endDate = endDatePicker.getValue();
+                boolean weekendOpen = weekendOpenCheckBox.isSelected();
+                String restDay = restDayComboBox.getValue();
 
                 if (beginDate == null || endDate == null) {
                     showAlert("Input Error", "Some of the inputs are wrong, try again.");
                     return;
                 }
 
+                if (beginDate.isAfter(endDate)) {
+                    showAlert("Input Error", "Begin date cannot be after end date.");
+                    return;
+                }
+
+                DayOfWeek restDayEnum = "no day".equals(restDay) ? null : DayOfWeek.valueOf(restDay.toUpperCase());
+
                 ArrayList<Employee> arrayList = new ArrayList<>(employeeList);
 
                 ScheduleCreator.addEmployeeList(arrayList);
 
-                ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, false, DayOfWeek.SATURDAY);
+                ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, weekendOpen, restDayEnum);
                 System.out.println(calendar);
                 if (outputDirectory != null) {
                     Export.CSVExport(calendar, outputDirectory);
@@ -342,11 +307,27 @@ public class Gui2 extends Application {
             }
         });
 
-        vbox.getChildren().addAll(new Label("Enter Schedule Configuration:"), employeesPerDayField, beginDatePicker, endDatePicker, chooseDirectoryButton, directoryLabel, generateScheduleButton);
+        vbox.getChildren().addAll(
+                new Label("Enter Schedule Configuration:"),
+                employeesPerDayField,
+                beginDatePicker,
+                endDatePicker,
+                weekendOpenCheckBox,
+                restDayComboBox,
+                chooseDirectoryButton,
+                directoryLabel,
+                generateScheduleButton
+        );
         tab.setContent(vbox);
         return tab;
     }
 
+    /**
+     * Displays an alert with a given title and message.
+     *
+     * @param title   The title of the alert.
+     * @param message The message of the alert.
+     */
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -355,6 +336,11 @@ public class Gui2 extends Application {
         alert.showAndWait();
     }
 
+    /**
+     * Stops the application and closes the database connection.
+     *
+     * @throws Exception If an error occurs.
+     */
     @Override
     public void stop() throws Exception {
         super.stop();

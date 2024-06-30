@@ -10,33 +10,33 @@ import java.util.*;
 import static it.scheduleplanner.planner.EmployeeComparator.getNext;
 import static it.scheduleplanner.planner.EmployeeComparator.assignWorkingHoursToEmployee;
 
-
+/**
+ * Class responsible for creating and managing employee shift schedules.
+ */
 public class ScheduleCreator {
 
     // Set to hold all employees
     public static Set<Employee> employeeSet = new HashSet<>();
 
     /**
-     * Adds an employee to the employeeSet if they are not already present.
+     * Adds an employee to the employeeSet.
      *
      * @param employee The employee to be added.
      */
     public static void addEmployee(Employee employee) {
-        if (!employeeSet.contains(employee)) {
-            employeeSet.add(employee);
-        }
+        employeeSet.add(employee);
     }
 
-    public static void removeEmployee(Employee employee) {
-        employeeSet.remove(employee);
-    }
-
+    /**
+     * Adds a list of employees to the employeeSet.
+     *
+     * @param employees The list of employees to be added.
+     */
     public static void addEmployeeList(ArrayList<Employee> employees) {
         for (Employee employee : employees) {
             addEmployee(employee);
         }
     }
-    //returns a calendar - consits out of
 
     /**
      * Creates a shift schedule for a specified period.
@@ -57,9 +57,16 @@ public class ScheduleCreator {
         // Iterate through each date in the generated date list
         for (LocalDate date : dateList) {
             ShiftDayInterface day = new FixedShiftDay();
-            Map<Employee, Shift> currentDayCoveredShift = getNext(employeeSet, date, numberOfEmployeesPerDay, restDay);
-            for (Employee employee : currentDayCoveredShift.keySet()) {
-                day.addEmployee(employee, currentDayCoveredShift.get(employee));
+            try {
+                Map<Employee, Shift> currentDayCoveredShift = getNext(employeeSet, date, numberOfEmployeesPerDay, restDay);
+                for (Employee employee : currentDayCoveredShift.keySet()) {
+                    day.addEmployee(employee, currentDayCoveredShift.get(employee));
+                }
+            } catch (InsufficientEmployeesException e) {
+                // Handle the exception (e.g., log it, notify the user, etc.)
+                System.err.println("Error generating schedule for " + date + ": " + e.getMessage());
+                // Optionally, you can rethrow the exception if you want it to be handled further up the call stack
+                // throw new RuntimeException(e);
             }
             calendar.addDay(date, day);
         }
@@ -114,5 +121,4 @@ public class ScheduleCreator {
         }
         return dateList;
     }
-
 }
