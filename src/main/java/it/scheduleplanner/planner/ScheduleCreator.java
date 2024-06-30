@@ -48,13 +48,12 @@ public class ScheduleCreator {
      * @param restDay The designated rest day for employees.
      * @return The generated shift schedule.
      */
-    public static ShiftScheduleInterface create(LocalDate begin, LocalDate end, int numberOfEmployeesPerDay, boolean weekendOpen, DayOfWeek restDay) {
-        // Initialize working hours if the schedule doesn't start on a Monday
+    public static ShiftScheduleInterface create(LocalDate begin, LocalDate end, int numberOfEmployeesPerDay, boolean weekendOpen, DayOfWeek restDay) throws InsufficientEmployeesException {
         assignWorkingHoursToEmployee(employeeSet);
         ShiftScheduleInterface calendar = new FixedShiftsSchedule(begin);
         List<LocalDate> dateList = generateDateList(begin, end, weekendOpen, restDay);
+        StringBuilder errorMessages = new StringBuilder();
 
-        // Iterate through each date in the generated date list
         for (LocalDate date : dateList) {
             ShiftDayInterface day = new FixedShiftDay();
             try {
@@ -63,17 +62,20 @@ public class ScheduleCreator {
                     day.addEmployee(employee, currentDayCoveredShift.get(employee));
                 }
             } catch (InsufficientEmployeesException e) {
-                // Handle the exception (e.g., log it, notify the user, etc.)
-                System.err.println("Error generating schedule for " + date + ": " + e.getMessage());
-                // Optionally, you can rethrow the exception if you want it to be handled further up the call stack
-                // throw new RuntimeException(e);
+                errorMessages.append("Error generating schedule for ").append(date).append(": ").append(e.getMessage()).append("\n");
             }
             calendar.addDay(date, day);
         }
-        // Print overtime hours for all employees
+
         printOvertimeHours(employeeSet);
+
+        if (errorMessages.length() > 0) {
+            throw new InsufficientEmployeesException(errorMessages.toString());
+        }
+
         return calendar;
     }
+
 
     /**
      * Prints the overtime hours for each employee.

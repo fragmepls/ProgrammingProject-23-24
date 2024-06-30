@@ -12,6 +12,7 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -25,7 +26,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Main GUI class for the Schedule Planner application.
@@ -65,17 +65,68 @@ public class Gui2 extends Application {
         // Creating Tabs
         TabPane tabPane = new TabPane();
 
+        Tab welcomeTab = welcomeTab();
         Tab employeeTab = createEmployeeTab(primaryStage);
         Tab vacationTab = createVacationTab();
         Tab scheduleTab = createScheduleTab(primaryStage);
 
-        tabPane.getTabs().addAll(employeeTab, vacationTab, scheduleTab);
+        tabPane.getTabs().addAll(welcomeTab, employeeTab, vacationTab, scheduleTab);
         mainLayout.setCenter(tabPane);
 
         Scene scene = new Scene(mainLayout, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
+    /**
+     * Creates the Welcome tab.
+     *
+     * @return The Welcome tab.
+     */
+    private Tab welcomeTab() {
+        Tab tab = new Tab("Welcome to Schedule Creator");
+        Label welcomeLabel = new Label("Welcome to Schedule Creator");
+        welcomeLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+
+        Label descriptionLabel = new Label("Schedule Creator is a tool designed to help you manage employee schedules effectively.\n" +
+                "You can add employees, schedule their vacations, configure work schedules, and generate shift calendars.\n" +
+                "The final schedule is exported as a CSV file, which can be opened in Microsoft Excel, Apple Numbers, or similar software.\n\n" +
+                "Add Employee Tab:\n" +
+                "To add an employee, you need to enter the following information:\n\n" +
+                "    - Employee Name: Enter the name of the employee.\n" +
+                "    - Is Weekend Worker: Check this box if the employee works on weekends.\n" +
+                "    - Select a Fixed Free Day: Choose a day of the week when the employee is free.\n" +
+                "    - Is Full Time: Check this box if the employee works full time.\n\n" +
+                "Send Employee on Vacation Tab:\n" +
+                "To send an employee on vacation, provide the following details:\n\n" +
+                "    - Employee: Select the employee from the dropdown list.\n" +
+                "    - Start Date: Choose the start date of the vacation.\n" +
+                "    - End Date: Choose the end date of the vacation.\n\n" +
+                "Schedule Configuration Tab:\n" +
+                "To configure the work schedule, fill in the following information:\n\n" +
+                "    - Number of Employees per Day: Enter the required number of employees for each day.\n" +
+                "    - Begin Date: Select the start date for the schedule.\n" +
+                "    - End Date: Select the end date for the schedule.\n" +
+                "    - Open on Weekends: Check this box if the business operates on weekends.\n" +
+                "    - Select Rest Day: Choose a day of the week when the business is closed, or select \"NO DAY\" if there is no fixed rest day.\n" +
+                "    - Choose Output Directory: Click the button to select the directory where the schedule will be saved.");
+        descriptionLabel.setWrapText(true);
+        descriptionLabel.setStyle("-fx-font-size: 14px;");
+
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(descriptionLabel);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefSize(600, 400); // Adjust width and height as needed
+
+        VBox vbox = new VBox(10);
+        vbox.getChildren().addAll(welcomeLabel, scrollPane);
+        vbox.setAlignment(Pos.CENTER);
+
+
+        tab.setContent(vbox);
+        return tab;
+    }
+
 
     /**
      * Creates the Employee tab.
@@ -107,7 +158,7 @@ public class Gui2 extends Application {
             boolean isFullTime = fullTimeCheckBox.isSelected();
 
             if (name.isEmpty() || freeDay == null) {
-                showAlert("Input Error", "Some of the inputs are wrong, try again.");
+                showAlert("Input Error", "Some of the inputs are wrong, try again.", Alert.AlertType.ERROR);
                 return;
             }
 
@@ -207,12 +258,12 @@ public class Gui2 extends Application {
             LocalDate endDate = endDatePicker.getValue();
 
             if (employee == null || startDate == null || endDate == null) {
-                showAlert("Input Error", "Some of the inputs are wrong, try again.");
+                showAlert("Input Error", "Some of the inputs are wrong, try again.", Alert.AlertType.ERROR);
                 return;
             }
 
             if (startDate.isAfter(endDate)) {
-                showAlert("Input Error", "Start date cannot be after end date.");
+                showAlert("Input Error", "Start date cannot be after end date.", Alert.AlertType.ERROR);
                 return;
             }
 
@@ -279,33 +330,45 @@ public class Gui2 extends Application {
                 String restDay = restDayComboBox.getValue();
 
                 if (beginDate == null || endDate == null) {
-                    showAlert("Input Error", "Some of the inputs are wrong, try again.");
+                    showAlert("Input Error", "Some of the inputs are wrong, try again.", Alert.AlertType.ERROR);
                     return;
                 }
 
                 if (beginDate.isAfter(endDate)) {
-                    showAlert("Input Error", "Begin date cannot be after end date.");
+                    showAlert("Input Error", "Begin date cannot be after end date.", Alert.AlertType.ERROR);
                     return;
                 }
 
-                DayOfWeek restDayEnum = "no day".equals(restDay) ? null : DayOfWeek.valueOf(restDay.toUpperCase());
+                if (restDay == null) {
+                    showAlert("Input Error", "Please select a rest day or no day.", Alert.AlertType.ERROR);
+                    return;
+                }
+
+                DayOfWeek restDayEnum = "NO DAY".equals(restDay) ? null : DayOfWeek.valueOf(restDay.toUpperCase());
 
                 ArrayList<Employee> arrayList = new ArrayList<>(employeeList);
-
                 ScheduleCreator.addEmployeeList(arrayList);
 
                 ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, weekendOpen, restDayEnum);
-                System.out.println(calendar);
+
                 if (outputDirectory != null) {
                     Export.CSVExport(calendar, outputDirectory);
                     Export.employeeExport(ScheduleCreator.employeeSet, outputDirectory);
+                    showAlert("Success", "Schedule exported successfully.", Alert.AlertType.INFORMATION);
                 } else {
                     System.out.println("No output directory selected.");
                 }
             } catch (NumberFormatException ex) {
-                showAlert("Input Error", "Number of Employees per Day must be a valid integer.");
+                showAlert("Input Error", "Number of Employees per Day must be a valid integer.", Alert.AlertType.ERROR);
+            } catch (InsufficientEmployeesException ex) {
+                showAlert("Scheduling Error", "There are not enough employees available, even with adding overtime hours. Please consider adding more employees or decreasing the number of employees required per day, then try again.", Alert.AlertType.ERROR);
+            } catch (Exception ex) {
+                showAlert("Error", "An unexpected error occurred: " + ex.getMessage(), Alert.AlertType.ERROR);
             }
         });
+
+
+
 
         vbox.getChildren().addAll(
                 new Label("Enter Schedule Configuration:"),
@@ -328,13 +391,14 @@ public class Gui2 extends Application {
      * @param title   The title of the alert.
      * @param message The message of the alert.
      */
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+    private void showAlert(String title, String message, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }
+
 
     /**
      * Stops the application and closes the database connection.

@@ -3,6 +3,7 @@ package it.scheduleplanner;
 import it.scheduleplanner.dbutils.DBUtils;
 import it.scheduleplanner.dbutils.SQLQueries;
 import it.scheduleplanner.export.*;
+import it.scheduleplanner.planner.InsufficientEmployeesException;
 import it.scheduleplanner.planner.ScheduleCreator;
 import it.scheduleplanner.utils.Employee;
 import it.scheduleplanner.utils.Vacation;
@@ -18,7 +19,7 @@ import java.util.Scanner;
 
 public class SchedulePlannerMain {
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, InsufficientEmployeesException {
         DBUtils.initializeDatabase();
         Connection connection = DBUtils.getConnection();
 

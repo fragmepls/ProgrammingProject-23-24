@@ -1,6 +1,7 @@
 import it.scheduleplanner.export.ShiftScheduleInterface;
 import it.scheduleplanner.planner.ScheduleCreator;
 import it.scheduleplanner.utils.Employee;
+import it.scheduleplanner.utils.Vacation;
 import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
@@ -84,6 +85,35 @@ public class ScheduleCreatorTest {
 
         // Create the shift schedule
         ShiftScheduleInterface schedule = ScheduleCreator.create(begin, end, 6, true, null);
+        System.out.println(schedule); // Output the created schedule (implementation-dependent)
+    }
+
+    @Test
+    public void testCreateSchedule2() {
+        // Add mock employees to the employeeSet
+        Employee emp1 = new Employee("Doe", true, "monday", false);
+        Employee emp2 = new Employee("Smith", true, "TUESDAY", true);
+        Employee emp3 = new Employee("Jack", true, "wednesday", true);
+
+
+        // Create a list of employee names for verification
+        ArrayList<String> employees = new ArrayList<>();
+        for (Employee employee : employeeSet) {
+            employees.add(employee.getName());
+        }
+
+        // Verify the list of employees
+        System.out.println(employees);
+
+        Vacation vacation = new Vacation(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 7, 7));
+        emp1.addVacation(vacation);
+
+        // Define schedule creation parameters
+        LocalDate begin = LocalDate.of(2024, 7, 1); // June 1, 2024
+        LocalDate end = LocalDate.of(2024, 7, 31);   // June 20, 2024
+
+        // Create the shift schedule
+        ShiftScheduleInterface schedule = ScheduleCreator.create(begin, end, 2, true, DayOfWeek.WEDNESDAY);
         System.out.println(schedule); // Output the created schedule (implementation-dependent)
     }
 }
