@@ -15,7 +15,7 @@ public class EmployeeListTest {
     /**
      * Test case to verify adding employees to the ScheduleCreator's employee set.
      */
-    /*@Test
+    @Test
     public void employeeListTest(){
 
         // Create employee objects
@@ -46,6 +46,6 @@ public class EmployeeListTest {
         // Verify that all employees are added to the ScheduleCreator's employee set
         assertEquals(expectedEmployees.size(), ScheduleCreator.employeeSet.size());
         assertEquals(expectedEmployees, ScheduleCreator.employeeSet);
-    }*/
+    }
 
 }
