@@ -33,7 +33,7 @@ import java.util.Arrays;
 public class Gui2 extends Application {
 
     private Connection connection;
-    private ObservableList<Employee> employeeList = FXCollections.observableArrayList();
+    private ObservableList<Employee> employeeList = FXCollections.observableArrayList(); //oslist has advantages in ui: like automatic updating in interface when list changes eg.
     private String outputDirectory;
 
     /**
@@ -56,15 +56,16 @@ public class Gui2 extends Application {
         DBUtils.initializeDatabase();
         connection = DBUtils.getConnection();
 
-        primaryStage.setTitle("Schedule Planner");
+        primaryStage.setTitle("Schedule Planner"); //like the primary window
 
         // Main layout
-        BorderPane mainLayout = new BorderPane();
+        BorderPane mainLayout = new BorderPane(); //sets the layout for the primaryStage
         mainLayout.setPadding(new Insets(10, 10, 10, 10));
 
         // Creating Tabs
-        TabPane tabPane = new TabPane();
+        TabPane tabPane = new TabPane(); //allows to create this "tab-layout"
 
+        //tabs get created here
         Tab welcomeTab = welcomeTab();
         Tab employeeTab = createEmployeeTab(primaryStage);
         Tab vacationTab = createVacationTab();
@@ -73,7 +74,7 @@ public class Gui2 extends Application {
         tabPane.getTabs().addAll(welcomeTab, employeeTab, vacationTab, scheduleTab);
         mainLayout.setCenter(tabPane);
 
-        Scene scene = new Scene(mainLayout, 800, 600);
+        Scene scene = new Scene(mainLayout, 800, 600); //main scene = a container that has all the elements printed in it
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -118,7 +119,8 @@ public class Gui2 extends Application {
         scrollPane.setFitToWidth(true);
         scrollPane.setPrefSize(600, 400); // Adjust width and height as needed
 
-        VBox vbox = new VBox(10);
+        VBox vbox = new VBox(10); //a layout container that arranges child nodes (all components) vertically in one column
+                                     // 10 means 10px space vertically between children - child nodes
         vbox.getChildren().addAll(welcomeLabel, scrollPane);
         vbox.setAlignment(Pos.CENTER);
 
@@ -144,14 +146,29 @@ public class Gui2 extends Application {
         CheckBox weekendWorkerCheckBox = new CheckBox("Is Weekend Worker");
 
         ComboBox<String> freeDayComboBox = new ComboBox<>();
-        freeDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values())
-                .map(DayOfWeek::toString)
-                .toList());
+        freeDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values()) //DayOfWeek. values returns an array of the ENUM (MONDAY, TUESDAY...)
+                                                                            //Arrays.stream makes out of the array a stream
+                .map(DayOfWeek::toString)                                   //.map is a method of streams that transforms each element of the stream --> here the DayofWeak to String)
+                .toList());                                                 //is a operation of stream, used to store all elements of the stream as an array.
+
+        //could also be done without stream, but with stream better transformation and better readability
 
         CheckBox fullTimeCheckBox = new CheckBox("Is Full Time");
 
         Button addButton = new Button("Add Employee");
-        addButton.setOnAction(e -> {
+
+        /*
+        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
+        -> When that happens the EventHandler appears.
+        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
+           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
+        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
+           usually used when the event occurs when the Event is triggered by a user action) as an argument.
+        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
+           that will be called when the button is clicked.
+         */
+
+        addButton.setOnAction(event -> {   //lambda expression -- usually used in Java with functional Interfaces
             String name = nameField.getText();
             boolean isWeekendWorker = weekendWorkerCheckBox.isSelected();
             String freeDay = freeDayComboBox.getValue();
@@ -258,7 +275,20 @@ public class Gui2 extends Application {
         endDatePicker.setPromptText("End Date");
 
         Button addVacationButton = new Button("Add Vacation");
-        addVacationButton.setOnAction(e -> {
+
+        /*
+        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
+        -> When that happens the EventHandler appears.
+        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
+           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
+        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
+           usually used when the event occurs when the Event is triggered by a user action) as an argument.
+        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
+           that will be called when the button is clicked.
+         */
+
+
+        addVacationButton.setOnAction(e -> {                //lambda expression
             Employee employee = employeeComboBox.getValue();
             LocalDate startDate = startDatePicker.getValue();
             LocalDate endDate = endDatePicker.getValue();
@@ -308,13 +338,28 @@ public class Gui2 extends Application {
 
         ComboBox<String> restDayComboBox = new ComboBox<>();
         restDayComboBox.getItems().add("NO DAY");
-        restDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values())
-                .map(DayOfWeek::toString)
-                .toList());
+        restDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values()) //DayOfWeek. values returns an array of the ENUM (MONDAY, TUESDAY...)
+                                                                            //Arrays.stream makes out of the array a stream
+                .map(DayOfWeek::toString)                                   //.map is a method of streams that transforms each element of the stream --> here the DayofWeak to String)
+                .toList());                                                 //is a operation of stream, used to store all elements of the stream as an array.
+
+        //could also be done without stream, but with stream better transformation and better readability
+
         restDayComboBox.setPromptText("Select Rest Day");
 
         Button chooseDirectoryButton = new Button("Choose Output Directory");
         Label directoryLabel = new Label("No directory chosen");
+
+        /*
+        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
+        -> When that happens the EventHandler appears.
+        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
+           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
+        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
+           usually used when the event occurs when the Event is triggered by a user action) as an argument.
+        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
+           that will be called when the button is clicked.
+         */
 
         chooseDirectoryButton.setOnAction(e -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -327,6 +372,17 @@ public class Gui2 extends Application {
         });
 
         Button generateScheduleButton = new Button("Generate Schedule");
+        /*
+        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
+        -> When that happens the EventHandler appears.
+        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
+           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
+        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
+           usually used when the event occurs when the Event is triggered by a user action) as an argument.
+        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
+           that will be called when the button is clicked.
+         */
+
         generateScheduleButton.setOnAction(e -> {
             try {
                 int numberOfEmployeesPerDay = Integer.parseInt(employeesPerDayField.getText());
@@ -375,6 +431,18 @@ public class Gui2 extends Application {
 
         // Button to show employees and overtime hours
         Button showEmployeesButton = new Button("Check overtime hours");
+
+        /*
+        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
+        -> When that happens the EventHandler appears.
+        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
+           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
+        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
+           usually used when the event occurs when the Event is triggered by a user action) as an argument.
+        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
+           that will be called when the button is clicked.
+         */
+
         showEmployeesButton.setOnAction(e -> showEmployeesAndOvertime());
 
         vbox.getChildren().addAll(

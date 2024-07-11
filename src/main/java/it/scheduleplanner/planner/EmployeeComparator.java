@@ -83,6 +83,8 @@ public class EmployeeComparator {
                         if (afternoonEmployee.getWorkingHours() >= 4) {
                             export.put(afternoonEmployee, Shift.AFTERNOON);
                             afternoonShiftAssigned = true;
+                           //TODO here added covered shifts++ --> missed for some reason
+                            coveredShifts++;
                             afternoonEmployee.setWorkingHours(afternoonEmployee.getWorkingHours() - 4);
                             availableEmployeesForOvertimeAfternoon.remove(afternoonEmployee);
                             break;
@@ -92,6 +94,8 @@ public class EmployeeComparator {
                     if (!afternoonShiftAssigned) {
                         export.remove(employee);
                         employee.setWorkingHours(employee.getWorkingHours() + 4);
+                        //TODO added here afterwards -- missed before
+                        availableEmployeesForOvertimeMorning.add(employee);
                         System.out.println("Problem to solve the afternoon shift, need to use overtime hours");
                         break;
                     }

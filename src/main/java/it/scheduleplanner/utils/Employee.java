@@ -21,6 +21,17 @@ public class Employee {
     private boolean fullTimeWorker;
     private List<Vacation> vacationList = new ArrayList<>();
 
+    //    An Employee object (Employee) has a list of Vacation objects (vacationList).
+    //    This list (vacationList) keeps track of all the vacations an employee has taken or is scheduled to take.
+    //    When an employee plans or takes a vacation, a new Vacation object is created with the start and end dates,
+    //    and then added to the employee's vacationList.
+
+
+    // Adding a Vacation - example:
+    // Create a new Vacation object for an employee:
+    // Vacation = new Vacation(LocalDate.of(2024, 7, 15), LocalDate.of(2024, 7, 30));
+    // employee.addVacation(vacation);
+
     /**
      * Constructs an Employee object with the specified attributes.
      *
