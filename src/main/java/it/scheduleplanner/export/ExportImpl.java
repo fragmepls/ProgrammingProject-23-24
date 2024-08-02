@@ -23,7 +23,7 @@ import java.time.LocalDate;
  * - it.scheduleplanner.FixedShiftsSchedule objects<br>
  * 
  */
-public class CSVExport implements Export {
+public class ExportImpl implements Export {
 	
 	private static Map<DefinedLinesTag, String> definedCSVLines = new HashMap<>();
 	
@@ -47,7 +47,7 @@ public class CSVExport implements Export {
 	 * @param scheduleToExport Schedule of type ShifScheduleInterface
 	 * @param pathToDirectory String describing the path to the desired directory
 	 */
-	protected static void simpleScheduleExport(ShiftScheduleInterface scheduleToExport, String pathToDirectory){
+	public boolean CSVExport(ShiftScheduleInterface scheduleToExport, String pathToDirectory){
 		initPredefinedLines();
 		initVariables(scheduleToExport);
 		
@@ -56,6 +56,8 @@ public class CSVExport implements Export {
 		
 		createScheduleFileContent();
 		writeToFile(fileName);
+		
+		return true;
 	}
 	
 	/**

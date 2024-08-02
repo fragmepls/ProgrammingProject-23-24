@@ -11,13 +11,6 @@ import it.scheduleplanner.utils.Employee;
 public interface ShiftDayInterface {
 
     /**
-     * Adds employee to the Day with 'shift' as 'full'.
-     *
-     * @param employee to be added to the Work Day
-     */
-    public void addEmployee(Employee employee);
-
-    /**
      * Adds employee to the Day with their associated shift.<br>
      * <br>
      * In case as shift Shift.HALF got accidentally selected, it will be converted into Shift.MORNING to ensure the exportability of the resulting day and therefore also schedule.

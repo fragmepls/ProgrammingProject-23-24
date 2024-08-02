@@ -23,15 +23,10 @@ public class FixedShiftDay implements ShiftDayInterface {
         employees.put(Shift.FULL, new ArrayList<>());
     }
 
-    
-    @Override
-    public void addEmployee(Employee employee) {
-        employees.get(Shift.FULL).add(employee);
-    }
-
     @Override
     public void addEmployee(Employee employee, Shift shift) {
-        if (shift == Shift.HALF) {
+    	
+    	if (shift == Shift.HALF) {
             shift = Shift.MORNING;
         }
         employees.get(shift).add(employee);

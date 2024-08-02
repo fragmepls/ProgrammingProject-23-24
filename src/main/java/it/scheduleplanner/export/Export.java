@@ -21,13 +21,7 @@ public interface Export {
 	 * @return false if schedule is not exportable
 	 * <li>true if the schedule is exportable
 	 */
-	public static Boolean CSVExport(ShiftScheduleInterface schedule, String pathToDirectory){
-		if (schedule.getSchedule().keySet().size() <= 0) {
-			return false;
-		}
-		CSVExport.simpleScheduleExport(schedule, pathToDirectory);
-		return true;
-	}
+	boolean CSVExport(ShiftScheduleInterface scheduleToExport, String pathToDirectory);
 	
 	/**
 	 * This method may be primarily used for debug purposes but can also be used to get an overview over all the employees.<br>
