@@ -20,6 +20,7 @@ public class Employee {
     private int workingHours;
     private boolean fullTimeWorker;
     private List<Vacation> vacationList = new ArrayList<>();
+    private final int employeeId;
 
     //    An Employee object (Employee) has a list of Vacation objects (vacationList).
     //    This list (vacationList) keeps track of all the vacations an employee has taken or is scheduled to take.
@@ -46,6 +47,11 @@ public class Employee {
         this.fullTimeWorker = fullTimeWorker;
         this.freeDay = DayOfWeek.valueOf(freeDay.toUpperCase());
         ScheduleCreator.addEmployee(this);
+        employeeId = ScheduleCreator.idCreator();
+    }
+
+    public int getEmployeeId() {
+        return employeeId;
     }
 
     /**
@@ -56,6 +62,7 @@ public class Employee {
     public void addVacation(Vacation vacation) {
         vacationList.add(vacation);
     }
+
 
     /**
      * Removes expired vacations from the employee's vacation list based on the current date.

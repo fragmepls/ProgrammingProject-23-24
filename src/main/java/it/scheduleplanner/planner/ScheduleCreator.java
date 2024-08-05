@@ -17,6 +17,7 @@ public class ScheduleCreator {
 
     // Set to hold all employees
     public static Set<Employee> employeeSet = new HashSet<>();
+    public static Set<Integer> employeeSetByID = new HashSet<>();
 
     /**
      * Adds an employee to the employeeSet.
@@ -26,6 +27,16 @@ public class ScheduleCreator {
     public static void addEmployee(Employee employee) {
         employeeSet.add(employee);
     }
+
+    public static int idCreator() {
+        int randomId;
+        do {
+             randomId = (int) (Math.random() * 999998) + 1;  //sets the range from 000001 to 999999
+        } while (employeeSetByID.contains(randomId));
+        employeeSetByID.add(randomId);
+        return randomId;
+    }
+
 
     /**
      * Adds a list of employees to the employeeSet.
