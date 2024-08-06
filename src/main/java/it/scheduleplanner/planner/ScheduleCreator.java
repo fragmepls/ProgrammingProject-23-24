@@ -29,12 +29,9 @@ public class ScheduleCreator {
     }
 
     public static int idCreator() {
-        int randomId;
-        do {
-             randomId = (int) (Math.random() * 999998) + 1;  //sets the range from 000001 to 999999
-        } while (employeeSetByID.contains(randomId));
-        employeeSetByID.add(randomId);
-        return randomId;
+        int employeeID = employeeSet.size();
+        employeeSetByID.add(employeeID);
+        return employeeID;
     }
 
 
@@ -52,11 +49,11 @@ public class ScheduleCreator {
     /**
      * Creates a shift schedule for a specified period.
      *
-     * @param begin The start date of the schedule.
-     * @param end The end date of the schedule.
+     * @param begin                   The start date of the schedule.
+     * @param end                     The end date of the schedule.
      * @param numberOfEmployeesPerDay The number of employees required per day.
-     * @param weekendOpen A flag indicating if weekends are considered working days.
-     * @param restDay The designated rest day for employees.
+     * @param weekendOpen             A flag indicating if weekends are considered working days.
+     * @param restDay                 The designated rest day for employees.
      * @return The generated shift schedule.
      */
     public static ShiftScheduleInterface create(LocalDate begin, LocalDate end, int numberOfEmployeesPerDay, boolean weekendOpen, DayOfWeek restDay) throws InsufficientEmployeesException {
@@ -104,10 +101,10 @@ public class ScheduleCreator {
     /**
      * Generates a list of dates for the scheduling period, excluding rest days and weekends if applicable.
      *
-     * @param begin The start date.
-     * @param end The end date.
+     * @param begin       The start date.
+     * @param end         The end date.
      * @param weekendOpen A flag indicating if weekends are considered working days.
-     * @param restDay The designated rest day.
+     * @param restDay     The designated rest day.
      * @return A list of dates to be included in the schedule.
      */
     public static List<LocalDate> generateDateList(LocalDate begin, LocalDate end, boolean weekendOpen, DayOfWeek restDay) {

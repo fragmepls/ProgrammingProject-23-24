@@ -229,8 +229,7 @@ public class EmployeeComparator {
      */
     public static boolean isAvailable(Employee employee, LocalDate date) {
         DayOfWeek dayOfWeek = date.getDayOfWeek();
-        if (employee.isOnVacation(date)) return false;
-        if (employee.getFreeDay() == dayOfWeek) return false;
+        if (employee.isOnVacation(date) || employee.getFreeDay() == dayOfWeek) return false;
         if ((dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) && !employee.isWeekendWorker())
             return false;
         return true;

@@ -36,9 +36,9 @@ public class Employee {
     /**
      * Constructs an Employee object with the specified attributes.
      *
-     * @param name the name of the employee
-     * @param weekendWorker whether the employee works on weekends
-     * @param freeDay the free day of the employee
+     * @param name           the name of the employee
+     * @param weekendWorker  whether the employee works on weekends
+     * @param freeDay        the free day of the employee
      * @param fullTimeWorker whether the employee is a full-time worker
      */
     public Employee(String name, boolean weekendWorker, String freeDay, boolean fullTimeWorker) {
