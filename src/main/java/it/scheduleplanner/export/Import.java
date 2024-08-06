@@ -1,5 +1,5 @@
 package it.scheduleplanner.export;
 
-public interface Import {
+public class Import {
 
 }
