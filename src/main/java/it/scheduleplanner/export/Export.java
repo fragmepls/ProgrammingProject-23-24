@@ -23,7 +23,7 @@ import java.time.LocalDate;
  * - it.scheduleplanner.FixedShiftsSchedule objects<br>
  * 
  */
-public class Export {
+public final class Export {
 	
 	private static Map<DefinedLinesTag, String> definedCSVLines = new HashMap<>();
 	
@@ -63,13 +63,13 @@ public class Export {
 		return true; //TODO change to meaningful implementation
 	}
 	
-	public static boolean exportBlankSchedule(LocalDate begin, LocalDate end, List<Employee> employeeList) {
+	public boolean exportBlankSchedule(LocalDate begin, LocalDate end, List<Employee> employeeList) {
 		initPredefinedLines();
 		calculateBeginEnd(begin, end);
 		fileContentList.add(definedCSVLines.get(DefinedLinesTag.DAYS));
 		do {
 			String dates = "";
-			for (int i = 1; i < 7; i++, beginOfExport = beginOfExport.plusDays(1)) {
+			for (int i = 0; i < 7; i++, beginOfExport = beginOfExport.plusDays(1)) {
 				dates += definedCSVLines.get(DefinedLinesTag.DATE) + beginOfExport.format(formatter_ddMMyyyy);
 			}
 			
@@ -115,7 +115,7 @@ public class Export {
 	    }
 	}
 	
-	private static void initPredefinedLines() {
+	private void initPredefinedLines() {
 		//definedCSVLines.put(DefinedLinesTag.EMPTY_LINE, ";"); TODO
 		definedCSVLines.put(DefinedLinesTag.DAYS, ";;Monday;;Tuesday;;Wednesday;;Thursday;;Friday;;Saturday;;Sunday;");
 		definedCSVLines.put(DefinedLinesTag.WEEK, ";Week Nr. ");
