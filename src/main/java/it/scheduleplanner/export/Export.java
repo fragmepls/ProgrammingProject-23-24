@@ -2,6 +2,11 @@ package it.scheduleplanner.export;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -9,6 +14,7 @@ import java.util.ArrayList;
 
 import it.scheduleplanner.utils.Employee;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.nio.file.Path;
@@ -40,6 +46,7 @@ public final class Export {
 	private static LocalDate endOfExport = null;
 	
 	private static DateTimeFormatter formatter_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+	private static ObjectMapper mapper = new ObjectMapper();
 
 	
 	/**
@@ -63,35 +70,82 @@ public final class Export {
 		return true; //TODO change to meaningful implementation
 	}
 	
-	public boolean exportBlankSchedule(LocalDate begin, LocalDate end, List<Employee> employeeList) {
+	/**
+	 * 
+	 * @param begin
+	 * @param end
+	 * @param employeeList
+	 * @param pathToDirectory
+	 * @return
+	 */
+	public boolean exportBlankSchedule(LocalDate begin, LocalDate end, Set<Employee> employeeList, String pathToDirectory) {
 		initPredefinedLines();
 		calculateBeginEnd(begin, end);
 		fileContentList.add(definedCSVLines.get(DefinedLinesTag.DAYS));
 		do {
+			//create line with dates
 			String dates = "";
 			for (int i = 0; i < 7; i++, beginOfExport = beginOfExport.plusDays(1)) {
 				dates += definedCSVLines.get(DefinedLinesTag.DATE) + beginOfExport.format(formatter_ddMMyyyy);
 			}
 			
+			//create line with week number and dates
 			fileContentList.add(definedCSVLines.get(DefinedLinesTag.WEEK) + beginOfExport.get(WeekFields.of(Locale.ITALY).weekOfYear()) + dates);
 
+			//add header
 			fileContentList.add(definedCSVLines.get(DefinedLinesTag.HEADER));
 			
+			//add all the employees
 			for (Employee empl : employeeList) {
 				fileContentList.add(empl.getName() + ';' + empl.getEmployeeId());
 			}
 			
-			fileContentList.add("\n");
+			//add empty line
+			fileContentList.add(";");
 			
 		} while(beginOfExport.isBefore(endOfExport));
 		
-		/*
-		 * create file
-		 * write to file
-		 */
+		//create file
+		String path = FileCreator.create(begin.toString(), pathToDirectory, ".csv", false).get(true);
+		
+		if(path == null) {
+			return false;
+		}
+		
+		//write content to file
+		writeToFile(path);
+		
 		return true; //TODO change to meaningful implementation
 	}
 
+	/**
+	 * This method may be primarily used for debug purposes but can also be used to get an overview over all the employees.<br>
+	 * It exports a JSON file containing all the necessary information bound to every Employee.
+	 * 
+	 * @param employees Set of Employees to be exported
+	 * @param pathToDirectory String describing the path to the desired directory
+	 * @return false if an error occurred
+	 * <li> true if everything functioned
+	 */
+	public static Boolean employeeExport(Set<Employee> employees, String pathToDirectory){
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		
+		String file = FileCreator.create("employees_" + LocalDate.now().toString(), pathToDirectory, ".json", true).get(true);
+		if (file == null) {
+			return false;
+		}
+		
+		try {
+			  mapper.writeValue(new File(file), employees);
+		  }
+		  catch (IOException e) {
+			  e.printStackTrace();
+			  return false;
+		  }
+		
+		return true;
+	}
+	
 	
 	
 	private static void createScheduleFileContent() {
@@ -108,14 +162,14 @@ public final class Export {
 	
 	private static void writeToFile(String file) {
 		try{
-			System.out.println("write to file: " + file);
 			Files.write(Path.of(file), fileContentList);
+			System.out.println("write to file: " + file);
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	    }
 	}
 	
-	private void initPredefinedLines() {
+	private static void initPredefinedLines() {
 		//definedCSVLines.put(DefinedLinesTag.EMPTY_LINE, ";"); TODO
 		definedCSVLines.put(DefinedLinesTag.DAYS, ";;Monday;;Tuesday;;Wednesday;;Thursday;;Friday;;Saturday;;Sunday;");
 		definedCSVLines.put(DefinedLinesTag.WEEK, ";Week Nr. ");

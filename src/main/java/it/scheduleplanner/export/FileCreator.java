@@ -8,10 +8,18 @@ import java.util.Map;
 
 class FileCreator {
 	
-	
+	/**
+	 * 
+	 * @param title
+	 * @param pathToDirectory
+	 * @param fileExtension
+	 * @param overrideExisting
+	 * @return Map<Boolean, String>; false = error, path to file
+	 */
 	protected static Map<Boolean, String> create(String title, String pathToDirectory, String fileExtension, boolean overrideExisting) {
 		String file = title.strip() + fileExtension.strip();
 		String fileName = "";
+		pathToDirectory = pathToDirectory.strip();
 		if (!pathToDirectory.endsWith("/")) {
 			pathToDirectory += "/";
 		}

@@ -1,5 +1,13 @@
 package it.scheduleplanner.export;
 
-public class Import {
+import java.time.LocalDate;
+import java.util.Map;
 
+public final class Import {
+
+	public static ShiftScheduleInterface importSchedule() {
+		
+		
+		return new FixedShiftsSchedule(null);
+	}
 }
