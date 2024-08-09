@@ -1,3 +1,4 @@
+package it.scheduleplanner.tests;
 import it.scheduleplanner.export.ShiftScheduleInterface;
 import it.scheduleplanner.planner.InsufficientEmployeesException;
 import it.scheduleplanner.planner.ScheduleCreator;

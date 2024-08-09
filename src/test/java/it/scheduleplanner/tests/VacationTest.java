@@ -1,3 +1,4 @@
+package it.scheduleplanner.tests;
 import it.scheduleplanner.utils.Employee;
 import it.scheduleplanner.utils.Vacation;
 import org.junit.jupiter.api.Test;

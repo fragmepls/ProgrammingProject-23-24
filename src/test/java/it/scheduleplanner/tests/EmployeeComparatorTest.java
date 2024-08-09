@@ -1,3 +1,4 @@
+package it.scheduleplanner.tests;
 import it.scheduleplanner.planner.EmployeeComparator;
 import it.scheduleplanner.planner.InsufficientEmployeesException;
 import it.scheduleplanner.utils.Employee;

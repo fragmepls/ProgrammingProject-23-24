@@ -1,9 +1,7 @@
 package it.scheduleplanner.export;
 
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.ArrayList;
 
 import it.scheduleplanner.utils.Employee;
 
@@ -12,15 +10,13 @@ import it.scheduleplanner.utils.Employee;
  */
 public class FixedShiftDay implements ShiftDayInterface {
 
-    private Map<Shift, List<Employee>> employees = new HashMap<>();
+    private Map<Employee, Shift> employees = new HashMap<>();
 
     /**
      * Basic constructor for FixedShiftDay
      */
     public FixedShiftDay() {
-        employees.put(Shift.MORNING, new ArrayList<>());
-        employees.put(Shift.AFTERNOON, new ArrayList<>());
-        employees.put(Shift.FULL, new ArrayList<>());
+        
     }
 
     @Override
@@ -29,17 +25,17 @@ public class FixedShiftDay implements ShiftDayInterface {
     	if (shift == Shift.HALF) {
             shift = Shift.MORNING;
         }
-        employees.get(shift).add(employee);
+        employees.put(employee, shift);
     }
 
     @Override
-    public Map<Shift, List<Employee>> getEmployees() {
+    public Map<Employee, Shift> getEmployees() {
         return employees;
     }
 
-    
-    @Override
-    public String toString() {
+    //TODO repair toString
+    //@Override
+    /*public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<Shift, List<Employee>> entry : employees.entrySet()) {
             sb.append(entry.getKey().toString()).append(": ");
@@ -52,5 +48,5 @@ public class FixedShiftDay implements ShiftDayInterface {
             sb.append("\n");
         }
         return sb.toString();
-    }
+    }*/
 }

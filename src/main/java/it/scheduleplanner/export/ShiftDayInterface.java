@@ -1,6 +1,5 @@
 package it.scheduleplanner.export;
 
-import java.util.List;
 import java.util.Map;
 
 import it.scheduleplanner.utils.Employee;
@@ -23,6 +22,6 @@ public interface ShiftDayInterface {
     /**
      * @return HashMap: Employees mapped to Shifts
      */
-    public Map<Shift, List<Employee>> getEmployees();
+    public Map<Employee, Shift> getEmployees();
 
 }
