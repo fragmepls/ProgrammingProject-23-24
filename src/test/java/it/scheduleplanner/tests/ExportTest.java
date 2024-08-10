@@ -10,7 +10,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+import java.util.regex.*;
+
+
 public class ExportTest {
+	
+	private static String str = "/home/isaiah/Desktop/(2)2024-06-01.csv";
+	
+	
 	public static void main(String[] args) {
 		Map<Boolean, String> map = new HashMap<>();
 		map.put(true, "Hello");
@@ -23,7 +30,13 @@ public class ExportTest {
 		}
 		sortList(list);
 		//Collections.sort(list);
-		System.out.println(map.get(true));
+		//System.out.println(map.get(true));
+		
+		
+		Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}.csv");
+		Matcher matcher = pattern.matcher(str);
+		matcher.find();
+		System.out.println(matcher.group().split("\\.")[0].split("-"));
 	}
 	
 	private static void sortList(List<LocalDate> listToSort) {
