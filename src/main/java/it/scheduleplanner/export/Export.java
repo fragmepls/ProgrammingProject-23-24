@@ -3,16 +3,14 @@ package it.scheduleplanner.export;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
+
+import java.util.Locale;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.ArrayList;
-
-import it.scheduleplanner.utils.Employee;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,9 +22,13 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.time.LocalDate;
 
+import it.scheduleplanner.utils.Employee;
+
 /**
- * The CSVExport class houses all necessary methods to export:<br>
- * - it.scheduleplanner.FixedShiftsSchedule objects<br>
+ * The Export class houses all necessary methods to export:<br>
+ * - empty schedules 'Export.exportBlankSchedule'<br>
+ * - it.scheduleplanner.export.FixedShiftsSchedule objects 'Export.CSVExport'<br>
+ * - a set of it.schedulaplanner.utils.Employee objects 'Export.employeeExport'<br>
  */
 public final class Export {
 	
@@ -37,20 +39,20 @@ public final class Export {
 		END_OF_EXPORT,
 	}
 	
-	private enum DefinedLinesTag {
+	protected enum DefinedLinesTag {
 		DAYS,
 		WEEK,
 		DATE,
 		HEADER
 	}
 	
-	private static final Map<DefinedLinesTag, String> DEFINED_CSV_LINES = Map.of(
+	protected static final Map<DefinedLinesTag, String> DEFINED_CSV_LINES = Map.of(
 			DefinedLinesTag.DAYS, ";;Monday;;Tuesday;;Wednesday;;Thursday;;Friday;;Saturday;;Sunday;",
 			DefinedLinesTag.WEEK, ";Week Nr. ",
 			DefinedLinesTag.DATE, ";Date:;",
 			DefinedLinesTag.HEADER, "Name;ID;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon");
 	
-	private static final DateTimeFormatter FORMATTER_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+	protected static final DateTimeFormatter FORMATTER_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 	
 	/*
