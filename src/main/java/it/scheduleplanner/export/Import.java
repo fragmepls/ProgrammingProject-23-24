@@ -2,7 +2,6 @@ package it.scheduleplanner.export;
 
 import java.time.LocalDate;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import java.util.stream.Stream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.io.File;
 import java.io.IOException;
 
 import java.nio.file.Path;
@@ -38,7 +36,7 @@ public final class Import {
 		
 		Map<LocalDate, Map<Employee, Shift>> shiftMap = createShiftMap(fileLines, employeeSet);
 		
-		return createSchedule(shiftMap);
+		return createSchedule(shiftMap, scheduleStart);
 	}
 	
 	
@@ -102,12 +100,13 @@ public final class Import {
 			shiftMap.putAll(parseWeek(dates, linesWithEmployees, employeeSet));
 		}
 		
-		return null;
+		return shiftMap;
 	}
 	
 	
 	private static Map<LocalDate, Map<Employee, Shift>> parseWeek(List<LocalDate> dates, List<String> lines, Set<Employee> employeeSet) {
 		List<String[]> splitLines = new ArrayList<String[]>();
+		Map<LocalDate, Map<Employee, Shift>> weekMap = new HashMap<LocalDate, Map<Employee,Shift>>();
 		
 		lines.forEach((line) -> splitLines.add(line.split(";")));
 		
@@ -118,9 +117,48 @@ public final class Import {
 			 * get Shift (own method)?
 			 * put shift with corresponding employee (getEmployeeWithID(int id)) into map
 			 */
+			weekMap.put(dates.get(i), new HashMap<Employee, Shift>());
+			
+			for (String[] line : splitLines) {
+				if (line[(2 * i) + 2].isBlank() && line[(2 * i) + 3].isBlank()) {
+					continue;
+				}
+				
+				int id = -1;
+				
+				try {
+					id = Integer.parseInt(line[1]);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					continue;
+				}
+				
+				Shift shift = getShift(line[(2 * i) + 2], line[(2 * i) + 3]);
+				Employee empl = getEmployeeWithID(id, employeeSet);
+				
+				if (empl != null) {
+					weekMap.get(dates.get(i)).put(empl, shift);
+				}
+				
+			}
 		}
 		
 		return null;
+	}
+	
+	private static Shift getShift(String morning, String afternoon) {
+		if (morning.isBlank()) {
+			return Shift.AFTERNOON;
+		}
+		
+		else if (afternoon.isBlank()) {
+			return Shift.MORNING;
+		}
+		
+		else {
+			return Shift.FULL;
+		}
 	}
 	
 	private static Employee getEmployeeWithID(int id, Set<Employee> employeeSet) {
@@ -144,8 +182,20 @@ public final class Import {
 		return datesList;
 	}
 	
-	private static ShiftScheduleInterface createSchedule(Map<LocalDate, Map<Employee, Shift>> shiftMap) {
-		return null;
+	private static ShiftScheduleInterface createSchedule(Map<LocalDate, Map<Employee, Shift>> shiftMap, LocalDate scheduleStart) {
+		ShiftScheduleInterface schedule = new FixedShiftsSchedule(scheduleStart);
+		
+		for (LocalDate date : shiftMap.keySet()) {
+			ShiftDayInterface day = new FixedShiftDay();
+			
+			for (Employee empl : shiftMap.get(date).keySet()) {
+				day.addEmployee(empl, shiftMap.get(date).get(empl));
+			}
+			
+			schedule.addDay(date, day);
+		}
+		
+		return schedule;
 	}
 	
 	/**

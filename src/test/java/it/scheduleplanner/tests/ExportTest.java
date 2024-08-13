@@ -26,10 +26,11 @@ public class ExportTest {
 
 		List<LocalDate> datesList = new ArrayList<LocalDate>();
 		
-		matcher.results().toList().forEach((date) -> datesList.add(LocalDate.parse(date.toString(), FORMATTER_ddMMyyyy)));
+		//matcher.results().toList().forEach((date) -> datesList.add(LocalDate.parse(date.toString(), FORMATTER_ddMMyyyy)));
 		
-		System.out.println(datesList.toString());
-		
+		//System.out.println(datesList.toString());
+		String string = ";;x;x";
+		System.out.println(string.split(";")[0].length());
 		
 		
 		Map<Boolean, String> map = new HashMap<>();
