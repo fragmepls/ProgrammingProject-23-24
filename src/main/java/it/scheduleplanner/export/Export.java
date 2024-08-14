@@ -71,11 +71,13 @@ public final class Export {
 	public static boolean CSVExport(ShiftScheduleInterface scheduleToExport, Set<Employee> employeeSet, String pathToDirectory){
 		Map<MapKeys, Object> vars = new HashMap<>();
 		List<String> fileContentList = new ArrayList<String>();
+
+		List<Employee> employeeList = sortEmployees(employeeSet);
 		
 		vars.putAll(initVariables(scheduleToExport));
 		vars.putAll(calculateExportBeginEnd((LocalDate)vars.get(MapKeys.BEGIN_OF_SCHEDULE), (LocalDate)vars.get(MapKeys.END_OF_SCHEDULE)));
 		
-		createScheduleFileContent(scheduleToExport.getSchedule(), employeeSet, fileContentList, (LocalDate)vars.get(MapKeys.BEGIN_OF_EXPORT), (LocalDate)vars.get(MapKeys.END_OF_EXPORT));
+		createScheduleFileContent(scheduleToExport.getSchedule(), employeeList, fileContentList, (LocalDate)vars.get(MapKeys.BEGIN_OF_EXPORT), (LocalDate)vars.get(MapKeys.END_OF_EXPORT));
 
 		String path = FileCreator.create(((LocalDate)vars.get(MapKeys.BEGIN_OF_SCHEDULE)).toString(), pathToDirectory, ".csv", false).get(true);
 		
@@ -98,6 +100,8 @@ public final class Export {
 		Map<MapKeys, Object> vars = new HashMap<>();
 		List<String> fileContentList = new ArrayList<String>();
 		
+		List<Employee> employeeList = sortEmployees(employeeSet);
+		
 		vars.putAll(calculateExportBeginEnd(begin, end));
 		fileContentList.add(DEFINED_CSV_LINES.get(DefinedLinesTag.DAYS));
 
@@ -106,7 +110,7 @@ public final class Export {
 			writeDatesAndHeader(fileContentList, date);
 			
 			//add all the employees
-			employeeSet.forEach((employee) -> fileContentList.add(employee.getName() + ";" + employee.getEmployeeId()));
+			employeeList.forEach((employee) -> fileContentList.add(employee.getName() + ";" + employee.getEmployeeId()));
 			
 			//add empty line
 			fileContentList.add(";");
@@ -173,7 +177,7 @@ public final class Export {
 		fileContentList.add(DEFINED_CSV_LINES.get(DefinedLinesTag.HEADER));
 	}
 
-	private static void createScheduleFileContent(Map<LocalDate, ShiftDayInterface> schedule, Set<Employee> employeeSet, List<String> fileContentList, LocalDate beginOfExport, LocalDate endOfExport) {
+	private static void createScheduleFileContent(Map<LocalDate, ShiftDayInterface> schedule, List<Employee> employeeList, List<String> fileContentList, LocalDate beginOfExport, LocalDate endOfExport) {
 		fileContentList.add(DEFINED_CSV_LINES.get(DefinedLinesTag.DAYS)); //add Days to content
 		
 		//iterate trough the dates and add the days to the content
@@ -181,7 +185,7 @@ public final class Export {
 		do {
 			System.out.println(date + " = first day in export");
 			
-			writeWeek(schedule, fileContentList, date, employeeSet);
+			writeWeek(schedule, fileContentList, date, employeeList);
 			
 			date = date.plusDays(7);
 		}while(date.isBefore(endOfExport));
@@ -192,12 +196,12 @@ public final class Export {
 	 * 
 	 * @param start (date of Monday)
 	 */
-	private static void writeWeek(Map<LocalDate, ShiftDayInterface> schedule, List<String> fileContentList, LocalDate start, Set<Employee> employeeSet) {
+	private static void writeWeek(Map<LocalDate, ShiftDayInterface> schedule, List<String> fileContentList, LocalDate start, List<Employee> employeeList) {
 		writeDatesAndHeader(fileContentList, start);
 		
 		Map<Employee, String> weekMap = new HashMap<Employee, String>();
 
-		employeeSet.forEach((employee) -> weekMap.put(employee, ";" + employee.getEmployeeId()));
+		employeeList.forEach((employee) -> weekMap.put(employee, ";" + employee.getEmployeeId()));
 		
 		for (LocalDate date = start; date.isBefore(start.plusDays(7)); date = date.plusDays(1)) {
 			writeDay(schedule.get(date), weekMap);
@@ -310,6 +314,12 @@ public final class Export {
 		return Map.of(
 				MapKeys.BEGIN_OF_EXPORT, beginOfExport,
 				MapKeys.END_OF_EXPORT, endOfExport);
+	}
+	
+	private static List<Employee> sortEmployees(Set<Employee> employeeSet){
+		List<Employee> employeeList = new ArrayList<Employee>(employeeSet);
+		Collections.sort(employeeList, (e1, e2) -> e1.getEmployeeId() - e2.getEmployeeId());
+		return employeeList;
 	}
 
 	/*

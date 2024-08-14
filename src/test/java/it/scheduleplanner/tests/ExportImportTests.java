@@ -21,11 +21,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ExportTest {
+public class ExportImportTests {
 	private static Set<Employee> eployeeSet = Set.of(
 			new Employee("empl1", false, "sunday", false), 
 			new Employee("empl2", false, "sunday", false), 
@@ -41,6 +42,33 @@ public class ExportTest {
 	private static final LocalDate END = LocalDate.of(2024, 8, 22);
 	
 	private static final DateTimeFormatter FORMATTER_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+	
+	//Strings comparison files
+	private static final String BLANK_SCHEDULE = ";;Monday;;Tuesday;;Wednesday;;Thursday;;Friday;;Saturday;;Sunday;\n"
+			+ ";Week Nr. 33;Date:;12.08.2024;Date:;13.08.2024;Date:;14.08.2024;Date:;15.08.2024;Date:;16.08.2024;Date:;17.08.2024;Date:;18.08.2024\n"
+			+ "Name;ID;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon\n"
+			+ "empl1;1\n"
+			+ "empl2;2\n"
+			+ "empl3;3\n"
+			+ "empl4;4\n"
+			+ "empl5;5\n"
+			+ ";\n"
+			+ ";Week Nr. 34;Date:;19.08.2024;Date:;20.08.2024;Date:;21.08.2024;Date:;22.08.2024;Date:;23.08.2024;Date:;24.08.2024;Date:;25.08.2024\n"
+			+ "Name;ID;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon\n"
+			+ "empl1;1\n"
+			+ "empl2;2\n"
+			+ "empl3;3\n"
+			+ "empl4;4\n"
+			+ "empl5;5\n"
+			+ ";";
+	
+	@BeforeAll
+	private static void checkForComparisonFiles() {
+		if (!Files.exists(Path.of(PATH_PREFIX + "/blankSchedule" + CSV_SUFFIX))) {
+			writeStringToFile(BLANK_SCHEDULE, PATH_PREFIX + "/blankSchedule" + CSV_SUFFIX);
+		}
+	}
+	
 	
 	
 	@Test
@@ -68,6 +96,20 @@ public class ExportTest {
 		}
 		
 		return textFile1.equals(textFile2);
+	}
+	
+	
+	private static boolean writeStringToFile(String string, String path) {
+		try {
+		    Files.writeString(
+		          Path.of(path),
+		          string
+		    );
+		} catch (IOException e) {
+		    e.printStackTrace();
+		    return false;
+		}
+		return true;
 	}
 
 }
