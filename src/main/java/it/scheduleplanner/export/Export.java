@@ -94,13 +94,13 @@ public final class Export {
 	 * @param pathToDirectory
 	 * @return
 	 */
-	public static boolean exportBlankSchedule(LocalDate begin, LocalDate end, Set<Employee> employeeSet, String pathToDirectory) {
+	public static Map<Boolean, String> exportBlankSchedule(LocalDate begin, LocalDate end, Set<Employee> employeeSet, String pathToDirectory) {
 		Map<MapKeys, Object> vars = new HashMap<>();
 		List<String> fileContentList = new ArrayList<String>();
 		
 		vars.putAll(calculateExportBeginEnd(begin, end));
 		fileContentList.add(DEFINED_CSV_LINES.get(DefinedLinesTag.DAYS));
-		
+
 		LocalDate date = (LocalDate)vars.get(MapKeys.BEGIN_OF_EXPORT);
 		do {
 			writeDatesAndHeader(fileContentList, date);
@@ -118,11 +118,11 @@ public final class Export {
 		String path = FileCreator.create(begin.toString(), pathToDirectory, ".csv", false).get(true);
 		
 		if(path == null) {
-			return false;
+			return Map.of(false, null);
 		}
 		
 		//write content to file
-		return writeToFile(fileContentList, path);
+		return Map.of(writeToFile(fileContentList, path), path);
 	}
 
 	/**

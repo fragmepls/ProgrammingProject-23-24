@@ -1,6 +1,8 @@
 package it.scheduleplanner.tests;
 
 import it.scheduleplanner.export.*;
+import it.scheduleplanner.utils.Employee;
+
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
@@ -10,52 +12,62 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
-
+import java.util.Set;
 import java.util.regex.*;
+import java.util.stream.Stream;
+import java.io.File;
+import java.io.IOException;
 
+import java.nio.file.Path;
+import java.nio.file.Files;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ExportTest {
+	private static Set<Employee> eployeeSet = Set.of(
+			new Employee("empl1", false, "sunday", false), 
+			new Employee("empl2", false, "sunday", false), 
+			new Employee("empl3", false, "sunday", false), 
+			new Employee("empl4", false, "sunday", false), 
+			new Employee("empl5", false, "sunday", false));
 	
-	private static String str = "/home/isaiah/Desktop/(2)2024-06-01.csv";
+	private static final File path = new File("src/test/resources/export");
+	private static final String PATH_PREFIX = path.getAbsolutePath();
+	private static final String CSV_SUFFIX = ".csv";
+	
+	private static final LocalDate BEGIN = LocalDate.of(2024, 8, 14);
+	private static final LocalDate END = LocalDate.of(2024, 8, 22);
+	
 	private static final DateTimeFormatter FORMATTER_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-
 	
-	public static void main(String[] args) {
-		Pattern pattern = Pattern.compile("\\d{2}\\.\\d{2}\\.\\d{4}");
-		Matcher matcher = pattern.matcher(";KW Nr.;Date:;01.06.2024;Date:;02.06.2024;Date:;03.06.2024;Date:;04.06.2024;Date:;05.06.2024;Date:;06.06.2024;Date:;07.06.2024\n");
-
-		List<LocalDate> datesList = new ArrayList<LocalDate>();
+	
+	@Test
+	void testBlankScheduleExport() {
+		System.out.println(PATH_PREFIX);
+		String exportedFile = Export.exportBlankSchedule(BEGIN, END, eployeeSet, PATH_PREFIX).get(true);
+		assertTrue(filesAreEqual(PATH_PREFIX + "/blankSchedule" + CSV_SUFFIX, exportedFile));
+	}
+	
+	private static boolean filesAreEqual(String pathToFile1, String pathToFile2) {
+		List<String> textFile1 = null;
+		List<String> textFile2 = null;
 		
-		//matcher.results().toList().forEach((date) -> datesList.add(LocalDate.parse(date.toString(), FORMATTER_ddMMyyyy)));
-		
-		//System.out.println(datesList.toString());
-		String string = ";;x;x";
-		System.out.println(string.split(";")[0].length());
-		
-		
-		Map<Boolean, String> map = new HashMap<>();
-		map.put(true, "Hello");
-		map.replace(true, map.get(true) + " World");
-		List<LocalDate> list = new ArrayList<>();
-		Random random = new Random();
-		for (int i = 0; i < 10; i++) {
-			int j = random.nextInt(29) + 1;
-			list.add(LocalDate.of(2024, Month.APRIL, j));
+		try (Stream<String> stream = Files.lines(Path.of(pathToFile1))){
+			textFile1 = stream.toList();
+		} catch (IOException e) {
+		    e.printStackTrace();
+		    return false;
 		}
-		sortList(list);
-		//Collections.sort(list);
-		//System.out.println(map.get(true));
+		try (Stream<String> stream = Files.lines(Path.of(pathToFile2))){
+			textFile2 = stream.toList();
+		} catch (IOException e) {
+		    e.printStackTrace();
+		    return false;
+		}
 		
-		
-		//Pattern pattern = Pattern.compile("\\d{4}-\\d{2}-\\d{2}.csv");
-		//Matcher matcher = pattern.matcher(str);
-		matcher.find();
-	//	LocalDate date = LocalDate.parse(matcher.group().split("\\.")[0]);
-		LocalDate date = LocalDate.parse("01.11.2003", FORMATTER_ddMMyyyy);
-		System.out.println(date.toString());
+		return textFile1.equals(textFile2);
 	}
-	
-	private static void sortList(List<LocalDate> listToSort) {
-		Collections.sort(listToSort);
-	}
+
 }
