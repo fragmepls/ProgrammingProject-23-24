@@ -34,19 +34,13 @@ public class FixedShiftDay implements ShiftDayInterface {
     }
 
     //TODO repair toString
-    //@Override
-    /*public String toString() {
+    @Override
+    public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (Map.Entry<Shift, List<Employee>> entry : employees.entrySet()) {
-            sb.append(entry.getKey().toString()).append(": ");
-            for (Employee employee : entry.getValue()) {
-                sb.append(employee.getName()).append(", ");
-            }
-            if (!entry.getValue().isEmpty()) {
-                sb.setLength(sb.length() - 2); // Remove the last comma and space
-            }
+        for (Employee empl : employees.keySet()) {
+            sb.append(empl.getName() + ", ID = " + empl.getEmployeeId() + " : " + employees.get(empl).toString());
             sb.append("\n");
         }
         return sb.toString();
-    }*/
+    }
 }

@@ -66,13 +66,15 @@ public final class Export {
 	 * The name will then look like this: ('Nr.')date.csv
 	 * 
 	 * @param scheduleToExport Schedule of type ShifScheduleInterface
+	 * @param employeeSet Set of all Employees
 	 * @param pathToDirectory String describing the path to the desired directory
+	 * @return Map{@literal <boolean success, String pathToFile>} if success is true, the path to the file is mapped to it, else "null" gets returned mapped to false. 
 	 */
-	public static boolean CSVExport(ShiftScheduleInterface scheduleToExport, Set<Employee> employeeSet, String pathToDirectory){
+	public static Map<Boolean, String> CSVExport(ShiftScheduleInterface scheduleToExport, Set<Employee> employeeSet, String pathToDirectory){
 		Map<MapKeys, Object> vars = new HashMap<>();
 		List<String> fileContentList = new ArrayList<String>();
 
-		List<Employee> employeeList = sortEmployees(employeeSet);
+		List<Employee> employeeList = sortEmployees(employeeSet); //sorted list of all employees
 		
 		vars.putAll(initVariables(scheduleToExport));
 		vars.putAll(calculateExportBeginEnd((LocalDate)vars.get(MapKeys.BEGIN_OF_SCHEDULE), (LocalDate)vars.get(MapKeys.END_OF_SCHEDULE)));
@@ -82,19 +84,19 @@ public final class Export {
 		String path = FileCreator.create(((LocalDate)vars.get(MapKeys.BEGIN_OF_SCHEDULE)).toString(), pathToDirectory, ".csv", false).get(true);
 		
 		if(path == null) {
-			return false;
+			return Map.of(false, null);
 		}
 		
-		return writeToFile(fileContentList, path);
+		return Map.of(writeToFile(fileContentList, path), path);
 	}
 	
 	/**
 	 * 
-	 * @param begin
-	 * @param end
-	 * @param employeeSet
-	 * @param pathToDirectory
-	 * @return
+	 * @param begin LocalDate of the first Date which has to be represented in the schedule
+	 * @param end LocalDate of the last Date which has to be represented in the schedule
+	 * @param employeeSet Set of all Employees
+	 * @param pathToDirectory String describing the path to the desired directory
+	 * @return Map{@literal <boolean success, String pathToFile>} if success is true, the path to the file is mapped to it, else "null" gets returned mapped to false.
 	 */
 	public static Map<Boolean, String> exportBlankSchedule(LocalDate begin, LocalDate end, Set<Employee> employeeSet, String pathToDirectory) {
 		Map<MapKeys, Object> vars = new HashMap<>();
@@ -112,7 +114,7 @@ public final class Export {
 			//add all the employees
 			employeeList.forEach((employee) -> fileContentList.add(employee.getName() + ";" + employee.getEmployeeId()));
 			
-			//add empty line
+			//add empty line as separator
 			fileContentList.add(";");
 			
 			date = date.plusDays(7);
@@ -201,36 +203,33 @@ public final class Export {
 		
 		Map<Employee, String> weekMap = new HashMap<Employee, String>();
 
+		//add employees as keys to the weekMap
 		employeeList.forEach((employee) -> weekMap.put(employee, ";" + employee.getEmployeeId()));
 		
+		//for every date in the week, get day from schedule and create corresponding csv text
 		for (LocalDate date = start; date.isBefore(start.plusDays(7)); date = date.plusDays(1)) {
-			System.out.println(date.toString());
 			writeDay(schedule.get(date), weekMap);
 		}
-//		
-//		/*
-//		 * The following code lines do the same as 
-//		 * weekMap.keySet().forEach((employee) -> fileContentList.add(employee.getName() + weekMap.get(employee)));
-//		 * would do with the difference, that the employees are getting sorted and therefore have the same order all the time
-//		 */
-//		List<Employee> list = new ArrayList<Employee>(weekMap.keySet());
-//		Collections.sort(list, (e1, e2) -> e1.getEmployeeId() - e2.getEmployeeId());
+
+		//Add the generated week to the content list to be exported. The lines get sorted by employee ID.
 		for (Employee empl : employeeList) {
 			fileContentList.add(empl.getName() + weekMap.get(empl));
 		}
 		
+		//add empty line as seperator
 		fileContentList.add(";");
 	}
 	
 	private static void writeDay(ShiftDayInterface day, Map<Employee, String> weekMap) {
+		//if no day in schedule for the date of the day to add, the day is "empty" and therefore only ";;" has to be added to all the lines
 		if (day == null) {
 			weekMap.keySet().forEach((employee) -> weekMap.replace(employee, weekMap.get(employee) + ";;"));
-			System.out.println("Day = null\n");
 			return;
 		}
 		
 		Map<Employee, Shift> employees = day.getEmployees();
 		
+		//add the corresponding csv text for the different possible shifts to to every employees line
 		for (Employee employee : weekMap.keySet()) {
 			try {
 				switch (employees.get(employee)) {
@@ -252,7 +251,6 @@ public final class Export {
 				}
 			} catch (Exception e) { //if the employee is not in the day
 				weekMap.replace(employee, weekMap.get(employee) + ";;");
-				System.out.println(employee.getName() + " has his off-day");
 			}
 		 
 		}
@@ -302,7 +300,7 @@ public final class Export {
 			break;
 		}
 
-		//calculate last date to be exported which has to be the first Friday after to the last occupied date unless itself is a Friday. 
+		//calculate last date to be exported which has to be the first Sunday after to the last occupied date unless itself is a Sunday. 
 		switch(end.getDayOfWeek().toString()) {
 		case "MONDAY":
 			endOfExport = end.plusDays(6);
@@ -334,6 +332,7 @@ public final class Export {
 	
 	private static List<Employee> sortEmployees(Set<Employee> employeeSet){
 		List<Employee> employeeList = new ArrayList<Employee>(employeeSet);
+		//sort employees by ID
 		Collections.sort(employeeList, (e1, e2) -> e1.getEmployeeId() - e2.getEmployeeId());
 		return employeeList;
 	}
@@ -354,13 +353,13 @@ public final class Export {
 		return true;
 	}
 
-	
 	/**
 	 * private constructor to suppress instantiation
 	 */
 	private Export() {
 		super();
 	}
+	
 }
 
 

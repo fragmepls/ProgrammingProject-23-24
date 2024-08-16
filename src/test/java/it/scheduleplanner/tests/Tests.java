@@ -66,6 +66,17 @@ public class Tests {
 		Export.CSVExport(createTestSchedule(), employeeSet, PATH_PREFIX);
 	}
 
+	private static boolean writeToFile(List<String> fileContentList, String pathToFile) {
+		try{
+			Files.write(Path.of(pathToFile), fileContentList);
+			System.out.println("write to file: " + pathToFile);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+		return true;
+	}
+	
 	private static ShiftScheduleInterface createTestSchedule() {
 		ShiftScheduleInterface schedule = new FixedShiftsSchedule(BEGIN);
 		int i = 0;
@@ -77,7 +88,6 @@ public class Tests {
 				}
 			}
 		}
-		System.out.println(schedule.toString());
 		System.out.println("Problem?" + schedule.getSchedule().get(LocalDate.of(2024, 8, 17)));
 		return schedule;
 	}
