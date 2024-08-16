@@ -204,39 +204,55 @@ public final class Export {
 		employeeList.forEach((employee) -> weekMap.put(employee, ";" + employee.getEmployeeId()));
 		
 		for (LocalDate date = start; date.isBefore(start.plusDays(7)); date = date.plusDays(1)) {
+			System.out.println(date.toString());
 			writeDay(schedule.get(date), weekMap);
 		}
+//		
+//		/*
+//		 * The following code lines do the same as 
+//		 * weekMap.keySet().forEach((employee) -> fileContentList.add(employee.getName() + weekMap.get(employee)));
+//		 * would do with the difference, that the employees are getting sorted and therefore have the same order all the time
+//		 */
+//		List<Employee> list = new ArrayList<Employee>(weekMap.keySet());
+//		Collections.sort(list, (e1, e2) -> e1.getEmployeeId() - e2.getEmployeeId());
+		for (Employee empl : employeeList) {
+			fileContentList.add(empl.getName() + weekMap.get(empl));
+		}
 		
-		weekMap.keySet().forEach((employee) -> fileContentList.add(employee.getName() + weekMap.get(employee)));
-		
+		fileContentList.add(";");
 	}
 	
 	private static void writeDay(ShiftDayInterface day, Map<Employee, String> weekMap) {
 		if (day == null) {
 			weekMap.keySet().forEach((employee) -> weekMap.replace(employee, weekMap.get(employee) + ";;"));
+			System.out.println("Day = null\n");
 			return;
 		}
 		
 		Map<Employee, Shift> employees = day.getEmployees();
 		
 		for (Employee employee : weekMap.keySet()) {
-		
-			switch (employees.get(employee)) {
-			case FULL:
-				weekMap.replace(employee, weekMap.get(employee) + ";x;x");
-				break;
-				
-			case MORNING:
-				weekMap.replace(employee, weekMap.get(employee) + ";x;");
-				break;
-				
-			case AFTERNOON:
-				weekMap.replace(employee, weekMap.get(employee) + ";;x");
-				break;
-				
-			default:
+			try {
+				switch (employees.get(employee)) {
+				case FULL:
+					weekMap.replace(employee, weekMap.get(employee) + ";x;x");
+					break;
+					
+				case MORNING:
+					weekMap.replace(employee, weekMap.get(employee) + ";x;");
+					break;
+					
+				case AFTERNOON:
+					weekMap.replace(employee, weekMap.get(employee) + ";;x");
+					break;
+					
+				default:
+					weekMap.replace(employee, weekMap.get(employee) + ";;");
+					break;
+				}
+			} catch (Exception e) { //if the employee is not in the day
 				weekMap.replace(employee, weekMap.get(employee) + ";;");
-				break;
+				System.out.println(employee.getName() + " has his off-day");
 			}
 		 
 		}

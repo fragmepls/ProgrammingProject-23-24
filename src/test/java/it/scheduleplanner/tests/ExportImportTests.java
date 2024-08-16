@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ExportImportTests {
-	private static Set<Employee> eployeeSet = Set.of(
+	private static Set<Employee> employeeSet = Set.of(
 			new Employee("empl1", false, "sunday", false), 
 			new Employee("empl2", false, "sunday", false), 
 			new Employee("empl3", false, "sunday", false), 
@@ -74,7 +74,7 @@ public class ExportImportTests {
 	@Test
 	void testBlankScheduleExport() {
 		System.out.println(PATH_PREFIX);
-		String exportedFile = Export.exportBlankSchedule(BEGIN, END, eployeeSet, PATH_PREFIX).get(true);
+		String exportedFile = Export.exportBlankSchedule(BEGIN, END, employeeSet, PATH_PREFIX).get(true);
 		assertTrue(filesAreEqual(PATH_PREFIX + "/blankSchedule" + CSV_SUFFIX, exportedFile));
 	}
 	

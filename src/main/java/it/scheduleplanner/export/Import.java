@@ -129,6 +129,10 @@ public final class Import {
 		
 		//go through all the imported days
 		for (LocalDate date : shiftMap.keySet()) {
+			if (shiftMap.get(date).isEmpty()) {
+				continue;
+			}
+			
 			ShiftDayInterface day = new FixedShiftDay();
 			
 			for (Employee empl : shiftMap.get(date).keySet()) {
