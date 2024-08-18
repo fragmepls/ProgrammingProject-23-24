@@ -21,4 +21,4 @@ buildNumber.properties
 /bin/
 
 # Test resources
-/resources/export/
+/resources/
