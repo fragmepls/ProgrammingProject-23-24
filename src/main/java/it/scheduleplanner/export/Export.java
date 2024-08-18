@@ -111,23 +111,23 @@ public final class Export {
 		do {
 			writeDatesAndHeader(fileContentList, date);
 			
-			//add all the employees
+//			add all the employees
 			employeeList.forEach((employee) -> fileContentList.add(employee.getName() + ";" + employee.getEmployeeId()));
 			
-			//add empty line as separator
+//			add empty line as separator
 			fileContentList.add(";");
 			
 			date = date.plusDays(7);
 		} while(date.isBefore((LocalDate)vars.get(MapKeys.END_OF_EXPORT)));
 		
-		//create file
+//		create file
 		String path = FileCreator.create(begin.toString(), pathToDirectory, ".csv", false).get(true);
 		
 		if(path == null) {
 			return Map.of(false, null);
 		}
 		
-		//write content to file
+//		write content to file
 		return Map.of(writeToFile(fileContentList, path), path);
 	}
 
@@ -166,27 +166,26 @@ public final class Export {
 	
 	private static void writeDatesAndHeader(List<String> fileContentList, LocalDate date) {
 		int weekNr = date.get(WeekFields.of(Locale.ITALY).weekOfYear());
-		//create line with dates
+//		create line with dates
 		String dates = "";
 		for (int i = 0; i < 7; i++, date = date.plusDays(1)) {
 			dates += DEFINED_CSV_LINES.get(DefinedLinesTag.DATE) + date.format(FORMATTER_ddMMyyyy);
 		}
 		
-		//create line with week number and dates
+//		create line with week number and dates
 		fileContentList.add(DEFINED_CSV_LINES.get(DefinedLinesTag.WEEK) + weekNr + dates);
 
-		//add header
+//		add header
 		fileContentList.add(DEFINED_CSV_LINES.get(DefinedLinesTag.HEADER));
 	}
 
 	private static void createScheduleFileContent(Map<LocalDate, ShiftDayInterface> schedule, List<Employee> employeeList, List<String> fileContentList, LocalDate beginOfExport, LocalDate endOfExport) {
 		fileContentList.add(DEFINED_CSV_LINES.get(DefinedLinesTag.DAYS)); //add Days to content
 		
-		//iterate trough the dates and add the days to the content
+//		iterate trough the dates and add the days to the content
 		LocalDate date = beginOfExport;
+//		System.out.println(date + " = first day in export");
 		do {
-			System.out.println(date + " = first day in export");
-			
 			writeWeek(schedule, fileContentList, date, employeeList);
 			
 			date = date.plusDays(7);
@@ -203,25 +202,25 @@ public final class Export {
 		
 		Map<Employee, String> weekMap = new HashMap<Employee, String>();
 
-		//add employees as keys to the weekMap
+//		add employees as keys to the weekMap
 		employeeList.forEach((employee) -> weekMap.put(employee, ";" + employee.getEmployeeId()));
 		
-		//for every date in the week, get day from schedule and create corresponding csv text
+//		for every date in the week, get day from schedule and create corresponding csv text
 		for (LocalDate date = start; date.isBefore(start.plusDays(7)); date = date.plusDays(1)) {
 			writeDay(schedule.get(date), weekMap);
 		}
 
-		//Add the generated week to the content list to be exported. The lines get sorted by employee ID.
+//		Add the generated week to the content list to be exported. The lines get sorted by employee ID.
 		for (Employee empl : employeeList) {
 			fileContentList.add(empl.getName() + weekMap.get(empl));
 		}
 		
-		//add empty line as seperator
+//		add empty line as seperator
 		fileContentList.add(";");
 	}
 	
 	private static void writeDay(ShiftDayInterface day, Map<Employee, String> weekMap) {
-		//if no day in schedule for the date of the day to add, the day is "empty" and therefore only ";;" has to be added to all the lines
+//		if no day in schedule for the date of the day to add, the day is "empty" and therefore only ";;" has to be added to all the lines
 		if (day == null) {
 			weekMap.keySet().forEach((employee) -> weekMap.replace(employee, weekMap.get(employee) + ";;"));
 			return;
@@ -229,7 +228,7 @@ public final class Export {
 		
 		Map<Employee, Shift> employees = day.getEmployees();
 		
-		//add the corresponding csv text for the different possible shifts to to every employees line
+//		add the corresponding csv text for the different possible shifts to to every employees line
 		for (Employee employee : weekMap.keySet()) {
 			try {
 				switch (employees.get(employee)) {
@@ -266,6 +265,7 @@ public final class Export {
 		Collections.sort(scheduleDates); //sort dates
 		LocalDate beginOfSchedule = scheduleToExport.getBeginOfSchedule(); //first date occupied by a day
 		LocalDate endOfSchedule = scheduleDates.get(scheduleDates.size() - 1); //last date occupied by a day
+		
 		return Map.of(
 				MapKeys.BEGIN_OF_SCHEDULE, beginOfSchedule,
 				MapKeys.END_OF_SCHEDULE, endOfSchedule);
@@ -275,7 +275,7 @@ public final class Export {
 		LocalDate beginOfExport = null;
 		LocalDate endOfExport = null;
 		
-		//calculate first date to be exported which has to be the first Monday prior to the first occupied date unless itself is a Monday. 
+//		calculate first date to be exported which has to be the first Monday prior to the first occupied date unless itself is a Monday. 
 		switch(begin.getDayOfWeek().toString()) {
 		case "MONDAY":
 			beginOfExport = begin;
@@ -300,7 +300,7 @@ public final class Export {
 			break;
 		}
 
-		//calculate last date to be exported which has to be the first Sunday after to the last occupied date unless itself is a Sunday. 
+//		calculate last date to be exported which has to be the first Sunday after to the last occupied date unless itself is a Sunday. 
 		switch(end.getDayOfWeek().toString()) {
 		case "MONDAY":
 			endOfExport = end.plusDays(6);
@@ -332,7 +332,7 @@ public final class Export {
 	
 	private static List<Employee> sortEmployees(Set<Employee> employeeSet){
 		List<Employee> employeeList = new ArrayList<Employee>(employeeSet);
-		//sort employees by ID
+//		sort employees by ID
 		Collections.sort(employeeList, (e1, e2) -> e1.getEmployeeId() - e2.getEmployeeId());
 		return employeeList;
 	}
@@ -345,7 +345,7 @@ public final class Export {
 	private static boolean writeToFile(List<String> fileContentList, String pathToFile) {
 		try{
 			Files.write(Path.of(pathToFile), fileContentList);
-			System.out.println("write to file: " + pathToFile);
+//			System.out.println("write to file: " + pathToFile);
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	        return false;

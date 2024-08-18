@@ -84,6 +84,44 @@ public class ExportImportTests {
 			+ "empl5;5;x;x;x;x;;;x;x;;;;;;\n"
 			+ ";";
 	
+	private static final String TEST_SCHEDULE = ";;Monday;;Tuesday;;Wednesday;;Thursday;;Friday;;Saturday;;Sunday;\n"
+			+ ";Week Nr. 33;Date:;12.08.2024;Date:;13.08.2024;Date:;14.08.2024;Date:;15.08.2024;Date:;16.08.2024;Date:;17.08.2024;Date:;18.08.2024\n"
+			+ "Name;ID;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon\n"
+			+ "empl1;1;;;;;;;x;x;x;x;;;;\n"
+			+ "empl2;2;;;;;;;x;;x;;;;;\n"
+			+ "empl3;3;;;;;;;x;;x;x;;;;\n"
+			+ "empl4;4;;;;;;;;x;x;x;;;;\n"
+			+ "empl5;5;;;;;;;x;x;;;;;;\n"
+			+ ";\n"
+			+ ";Week Nr. 34;Date:;19.08.2024;Date:;20.08.2024;Date:;21.08.2024;Date:;22.08.2024;Date:;23.08.2024;Date:;24.08.2024;Date:;25.08.2024\n"
+			+ "Name;ID;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon;morning;afternoon\n"
+			+ "empl1;1;x;x;x;x;x;x;x;x;x;;;;;\n"
+			+ "empl2;2;x;;x;;x;;x;;x;;;;;\n"
+			+ "empl3;3;x;;x;x;x;x;x;;x;;;;;\n"
+			+ "empl4;4;;x;;;x;x;;x;x;;;;;\n"
+			+ "empl5;5;x;x;x;x;;;x;x;x;;;;;\n"
+			+ ";";
+	
+	private static final String IMPORT_SCHEDULE = ",,Monday,,Tuesday,,Wednesday,,Thursday,,Friday,,Saturday,,Sunday,\n"
+			+ ",Week Nr. 33,Date:,12.08.2024,Date:,13.08.2024,Date:,14.08.2024,Date:,15.08.2024,Date:,16.08.2024,Date:,17.08.2024,Date:,18.08.2024\n"
+			+ "Name,ID,morning,afternoon,morning,afternoon,morning,afternoon,morning,afternoon,morning,afternoon,morning,afternoon,morning,afternoon\n"
+			+ "empl1,1,,,,,x,x,x,x,x,x,,,,\n"
+			+ "empl2,2,,,,,x,,x,,x,,,,,\n"
+			+ "empl3,3,,,,,x,,x,,x,x,,,,\n"
+			+ "empl4,4,,,,,,x,,x,x,x,,,,\n"
+			+ "empl5,5,,,,,x,x,x,x,,,,,,\n"
+			+ ",,,,,,,,,,,,,,,\n"
+			+ ",Week Nr. 34,Date:,19.08.2024,Date:,20.08.2024,Date:,21.08.2024,Date:,22.08.2024,Date:,23.08.2024,Date:,24.08.2024,Date:,25.08.2024\n"
+			+ "Name,ID,morning,afternoon,morning,afternoon,morning,afternoon,morning,afternoon,morning,afternoon,morning,afternoon,morning,afternoon\n"
+			+ "empl1,1,x,x,x,x,x,x,x,x,,,,,,\n"
+			+ "empl2,2,x,,x,,x,,x,,,,,,,\n"
+			+ "empl3,3,x,,x,x,x,x,x,,,,,,,\n"
+			+ "empl4,4,,x,,,x,x,,x,,,,,,\n"
+			+ "empl5,5,x,x,x,x,,,x,x,,,,,,\n"
+			+ "";
+	
+	
+	
 	
 	/*
 	 * Initialization
@@ -97,6 +135,12 @@ public class ExportImportTests {
 		
 //		initialize shift schedule for comparison
 		writeStringToFile(SHIFT_SCHEDULE, PATH_PREFIX + "/shiftSchedule" + CSV_SUFFIX);
+		
+//		initialize csv file of shift schedule for import test
+		writeStringToFile(IMPORT_SCHEDULE, PATH_PREFIX + "/2024-08-14" + CSV_SUFFIX);
+		
+//		initialize csv file of shift schedule for import test
+		writeStringToFile(TEST_SCHEDULE, PATH_PREFIX + "/2024-08-15" + CSV_SUFFIX);
 		
 //		create schedule for tests
 		int i = 0;
@@ -134,21 +178,24 @@ public class ExportImportTests {
 	}
 	
 	/**
-	 * 
+	 * Test case for testing if the imported schedule equals the schedule the file represents by using the toString() method.
+	 * The imported file represents a file which may have been manipulated by an other application.
 	 */
 	@Test
-	@Disabled
 	void testShiftScheduleImport() {
-		
+		ShiftScheduleInterface importedSchedule = Import.importSchedule(PATH_PREFIX + "/2024-08-14" + CSV_SUFFIX, employeeSet);
+		assertEquals(schedule.toString(), importedSchedule.toString());
 	}
 	
 	/**
-	 * 
+	 * Test case to test the combination of import and export at the example of an schedule different from the other tests.
+	 * Important! Due to the way the similarity of the two files gets tested, this test doesn't represent the import of a file 
 	 */
 	@Test
-	@Disabled
 	void testImportExportCombined() {
-		
+		ShiftScheduleInterface importedSchedule = Import.importSchedule(PATH_PREFIX + "/2024-08-15" + CSV_SUFFIX, employeeSet);
+		String exportedFile = Export.CSVExport(importedSchedule, employeeSet, PATH_PREFIX).get(true);
+		assertTrue(exportedFile != null && filesAreEqual(PATH_PREFIX + "/2024-08-15" + CSV_SUFFIX, exportedFile));
 	}
 	
 	/**

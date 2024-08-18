@@ -14,7 +14,7 @@ class FileCreator {
 	 * @param pathToDirectory
 	 * @param fileExtension
 	 * @param overrideExisting
-	 * @return Map<Boolean, String>; false = error, path to file
+	 * @return Map{@literal <Boolean, String>}; {@literal <false = error, path to file>}
 	 */
 	protected static Map<Boolean, String> create(String title, String pathToDirectory, String fileExtension, boolean overrideExisting) {
 		String file = title.strip() + fileExtension.strip();
@@ -31,18 +31,18 @@ class FileCreator {
 				if(!Files.exists(Path.of(fileName))) { // file doesn't already exist
 					Files.createFile(Path.of(fileName)); // create file
 				}
-				System.out.println(fileName + " might get overwritten");
+//				System.out.println(fileName + " might get overwritten");
 				return Map.of(true, fileName);
 			}
 			int i = 1; //variable to alter filename
 			while(true) {
 				if (!Files.exists(Path.of(fileName))) { //if file doesn't already exist
-		    		System.out.println("create file: " + fileName);
+//		    		System.out.println("create file: " + fileName);
 		    		Files.createFile(Path.of(fileName)); //create file
 					return Map.of(true, fileName);
 			    } 
 			    else { //file already exists
-			    	//add prefix to file
+//			    	add prefix to file
 			    	fileName = pathToDirectory + "(" + i + ")" + file;
 			    	i++;
 				}

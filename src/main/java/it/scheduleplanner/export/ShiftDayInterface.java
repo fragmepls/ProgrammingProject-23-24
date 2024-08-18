@@ -24,4 +24,5 @@ public interface ShiftDayInterface {
      */
     public Map<Employee, Shift> getEmployees();
 
+    String toString();
 }

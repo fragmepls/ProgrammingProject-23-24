@@ -46,7 +46,7 @@ public class FixedShiftsSchedule implements ShiftScheduleInterface {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Schedule starting from: ").append(beginOfSchedule.toString()).append("\n");
 		for (Map.Entry<LocalDate, ShiftDayInterface> entry : schedule.entrySet()) {
-			sb.append(entry.getKey().toString()).append(": ").append(entry.getValue().toString()).append("\n");
+			sb.append(entry.getKey().toString()).append(":\n").append(entry.getValue().toString()).append("\n");
 		}
 		return sb.toString();
 	}
