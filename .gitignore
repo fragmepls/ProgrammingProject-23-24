@@ -19,3 +19,6 @@ buildNumber.properties
 
 .idea
 /bin/
+
+# Test resources
+/resources/export/
