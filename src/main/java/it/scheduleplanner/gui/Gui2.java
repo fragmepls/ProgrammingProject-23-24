@@ -26,6 +26,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Main GUI class for the Schedule Planner application.
@@ -33,7 +34,7 @@ import java.util.Arrays;
 public class Gui2 extends Application {
 
     private Connection connection;
-    private ObservableList<Employee> employeeList = FXCollections.observableArrayList(); //oslist has advantages in ui: like automatic updating in interface when list changes eg.
+    private ObservableList<Employee> employeeList = FXCollections.observableArrayList();
     private String outputDirectory;
 
     /**
@@ -158,16 +159,7 @@ public class Gui2 extends Application {
 
         Button addButton = new Button("Add Employee");
 
-        /*
-        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
-        -> When that happens the EventHandler appears.
-        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
-           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
-        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
-           usually used when the event occurs when the Event is triggered by a user action) as an argument.
-        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
-           that will be called when the button is clicked.
-         */
+
 
         addButton.setOnAction(event -> {   //lambda expression -- usually used in Java with functional Interfaces
             String name = nameField.getText();
@@ -193,15 +185,6 @@ public class Gui2 extends Application {
             fullTimeCheckBox.setSelected(false);
         });
 
-        Button importButton = new Button("Import Employees from Database");
-
-        importButton.setOnAction(e -> {
-            try {
-                employeeList.addAll(SQLQueries.selectAllEmployees(connection));
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
 
         Button viewEmployeesButton = new Button("View Employees");
         viewEmployeesButton.setOnAction(e -> showEmployeeList(primaryStage));
@@ -209,7 +192,7 @@ public class Gui2 extends Application {
         vbox.getChildren().addAll(
                 new Label("Enter Employee Name:"), nameField, weekendWorkerCheckBox,
                 new Label("Select a fixed free Day:"),
-                freeDayComboBox, fullTimeCheckBox, addButton, importButton, viewEmployeesButton
+                freeDayComboBox, fullTimeCheckBox, addButton, viewEmployeesButton
         );
         tab.setContent(vbox);
         return tab;
@@ -228,20 +211,54 @@ public class Gui2 extends Application {
         vbox.setPadding(new Insets(10, 10, 10, 10));
 
         for (Employee employee : employeeList) {
-            vbox.getChildren().add(new Label(employee.getName()));
+            HBox employeeRow = new HBox(10);
+            Label employeeLabel = new Label(employee.getName());
+
+            Button deleteButton = new Button("Delete");
+            deleteButton.setOnAction(e -> {
+                try {
+                    SQLQueries.deleteEmployee(connection, employee.getEmployeeId());
+                    employeeList.remove(employee);
+                    vbox.getChildren().remove(employeeRow);
+                } catch (SQLException ex) {
+                    showAlert("Deletion Error", "Failed to delete the employee.", Alert.AlertType.ERROR);
+                    ex.printStackTrace();
+                }
+            });
+
+            employeeRow.getChildren().addAll(employeeLabel, deleteButton);
+            vbox.getChildren().add(employeeRow);
         }
 
-        Scene scene = new Scene(vbox, 400, 300);
+        Button deleteAllButton = new Button("Delete All Employees");
+        deleteAllButton.setOnAction(e -> {
+            try {
+                // Delete all employees from the database
+                for (Employee employee : new ArrayList<>(employeeList)) {
+                    SQLQueries.deleteEmployee(connection, employee.getEmployeeId());
+                }
+                employeeList.clear();
+                vbox.getChildren().clear();
+                vbox.getChildren().add(deleteAllButton);  // Re-add the Delete All button
+            } catch (SQLException ex) {
+                showAlert("Deletion Error", "Failed to delete all employees.", Alert.AlertType.ERROR);
+                ex.printStackTrace();
+            }
+        });
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(vbox);
-        scrollPane.setFitToWidth(true); // Enable horizontal scroll if needed
-        scrollPane.setFitToHeight(true); // Enable vertical scroll
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
 
+        vbox.getChildren().add(deleteAllButton);  // Add the Delete All button at the bottom
+
+        Scene scene = new Scene(scrollPane, 400, 300);
         employeeListStage.setScene(scene);
         employeeListStage.initOwner(primaryStage);
         employeeListStage.show();
     }
+
 
     /**
      * Creates the Vacation tab.
@@ -287,16 +304,6 @@ public class Gui2 extends Application {
 
         Button addVacationButton = new Button("Add Vacation");
 
-        /*
-        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
-        -> When that happens the EventHandler appears.
-        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
-           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
-        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
-           usually used when the event occurs when the Event is triggered by a user action) as an argument.
-        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
-           that will be called when the button is clicked.
-         */
 
 
         addVacationButton.setOnAction(e -> {                //lambda expression
@@ -359,23 +366,12 @@ public class Gui2 extends Application {
                 .map(DayOfWeek::toString)                                   //.map is a method of streams that transforms each element of the stream --> here the DayofWeak to String)
                 .toList());                                                 //is a operation of stream, used to store all elements of the stream as an array.
 
-        //could also be done without stream, but with stream better transformation and better readability
 
         restDayComboBox.setPromptText("Select Rest Day");
 
         Button chooseDirectoryButton = new Button("Choose Output Directory");
         Label directoryLabel = new Label("No directory chosen");
 
-        /*
-        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
-        -> When that happens the EventHandler appears.
-        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
-           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
-        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
-           usually used when the event occurs when the Event is triggered by a user action) as an argument.
-        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
-           that will be called when the button is clicked.
-         */
 
         chooseDirectoryButton.setOnAction(e -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -388,16 +384,6 @@ public class Gui2 extends Application {
         });
 
         Button generateScheduleButton = new Button("Generate Schedule");
-        /*
-        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
-        -> When that happens the EventHandler appears.
-        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
-           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
-        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
-           usually used when the event occurs when the Event is triggered by a user action) as an argument.
-        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
-           that will be called when the button is clicked.
-         */
 
         generateScheduleButton.setOnAction(e -> {
             try {
@@ -430,9 +416,17 @@ public class Gui2 extends Application {
                 ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, weekendOpen, restDayEnum);
 
                 if (outputDirectory != null) {
-                    //Export.CSVExport(calendar, outputDirectory);
+                    // Export the schedule to a CSV file
+                    Map<Boolean, String> exportResult = Export.CSVExport(calendar, ScheduleCreator.employeeSet, outputDirectory);
+
+                    if (exportResult.containsKey(true) && exportResult.get(true) != null) {
+                        showAlert("Success", "Schedule exported successfully to: " + exportResult.get(true), Alert.AlertType.INFORMATION);
+                    } else {
+                        showAlert("Error", "Failed to export schedule. Please check the output directory and try again.", Alert.AlertType.ERROR);
+                    }
+
+                    // Optionally export employee data as well
                     Export.employeeExport(ScheduleCreator.employeeSet, outputDirectory);
-                    showAlert("Success", "Schedule exported successfully.", Alert.AlertType.INFORMATION);
                 } else {
                     System.out.println("No output directory selected.");
                 }
@@ -448,16 +442,7 @@ public class Gui2 extends Application {
         // Button to show employees and overtime hours
         Button showEmployeesButton = new Button("Check overtime hours");
 
-        /*
-        -> Events happen in JavaFX everytime when something changes, or should change - eg. when a user clicks a button.
-        -> When that happens the EventHandler appears.
-        -> EventHandler is a functional Interface in JavaFX that defines the single method handle.
-           (functional Interfaces in Java are Interfaces that have exactly one (abstract) method)
-        -> The handle method takes an Event, or a subclass of Event, such as ActionEvent (used here,
-           usually used when the event occurs when the Event is triggered by a user action) as an argument.
-        -> button.setOnAction() is a method provided by JavaFX to register an EventHandler (implemented here as a lambda expression)
-           that will be called when the button is clicked.
-         */
+
 
         showEmployeesButton.setOnAction(e -> showEmployeesAndOvertime());
 
