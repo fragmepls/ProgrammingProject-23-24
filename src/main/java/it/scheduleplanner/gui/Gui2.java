@@ -55,6 +55,7 @@ public class Gui2 extends Application {
     public void start(Stage primaryStage) throws SQLException {
         DBUtils.initializeDatabase();
         connection = DBUtils.getConnection();
+        //SQLQueries.truncateDatabase(connection);
 
         primaryStage.setTitle("Schedule Planner"); //like the primary window
 
@@ -120,7 +121,7 @@ public class Gui2 extends Application {
         scrollPane.setPrefSize(600, 400); // Adjust width and height as needed
 
         VBox vbox = new VBox(10); //a layout container that arranges child nodes (all components) vertically in one column
-                                     // 10 means 10px space vertically between children - child nodes
+        // 10 means 10px space vertically between children - child nodes
         vbox.getChildren().addAll(welcomeLabel, scrollPane);
         vbox.setAlignment(Pos.CENTER);
 
@@ -147,7 +148,7 @@ public class Gui2 extends Application {
 
         ComboBox<String> freeDayComboBox = new ComboBox<>();
         freeDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values()) //DayOfWeek. values returns an array of the ENUM (MONDAY, TUESDAY...)
-                                                                            //Arrays.stream makes out of the array a stream
+                //Arrays.stream makes out of the array a stream
                 .map(DayOfWeek::toString)                                   //.map is a method of streams that transforms each element of the stream --> here the DayofWeak to String)
                 .toList());                                                 //is a operation of stream, used to store all elements of the stream as an array.
 
@@ -180,16 +181,26 @@ public class Gui2 extends Application {
             }
 
             Employee employee = new Employee(name, isWeekendWorker, freeDay, isFullTime);
-            employeeList.add(employee);
             try {
-                SQLQueries.insertEmployee(connection, employee);
+                employee.setEmployeeId(SQLQueries.insertEmployee(connection, employee));
             } catch (SQLException ex) {
                 throw new RuntimeException(ex);
             }
+            employeeList.add(employee);
 
             nameField.clear();
             weekendWorkerCheckBox.setSelected(false);
             fullTimeCheckBox.setSelected(false);
+        });
+
+        Button importButton = new Button("Import Employees from Database");
+
+        importButton.setOnAction(e -> {
+            try {
+                employeeList.addAll(SQLQueries.selectAllEmployees(connection));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         Button viewEmployeesButton = new Button("View Employees");
@@ -198,7 +209,7 @@ public class Gui2 extends Application {
         vbox.getChildren().addAll(
                 new Label("Enter Employee Name:"), nameField, weekendWorkerCheckBox,
                 new Label("Select a fixed free Day:"),
-                freeDayComboBox, fullTimeCheckBox, addButton, viewEmployeesButton
+                freeDayComboBox, fullTimeCheckBox, addButton, importButton, viewEmployeesButton
         );
         tab.setContent(vbox);
         return tab;
@@ -305,6 +316,11 @@ public class Gui2 extends Application {
 
             Vacation vacation = new Vacation(startDate, endDate);
             employee.addVacation(vacation);
+            try {
+                SQLQueries.insertVacation(connection, employee.getEmployeeId(), startDate.toString(), endDate.toString());
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
 
             startDatePicker.setValue(null);
             endDatePicker.setValue(null);
@@ -339,7 +355,7 @@ public class Gui2 extends Application {
         ComboBox<String> restDayComboBox = new ComboBox<>();
         restDayComboBox.getItems().add("NO DAY");
         restDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values()) //DayOfWeek. values returns an array of the ENUM (MONDAY, TUESDAY...)
-                                                                            //Arrays.stream makes out of the array a stream
+                //Arrays.stream makes out of the array a stream
                 .map(DayOfWeek::toString)                                   //.map is a method of streams that transforms each element of the stream --> here the DayofWeak to String)
                 .toList());                                                 //is a operation of stream, used to store all elements of the stream as an array.
 
@@ -414,7 +430,7 @@ public class Gui2 extends Application {
                 ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, weekendOpen, restDayEnum);
 
                 if (outputDirectory != null) {
-                    Export.CSVExport(calendar, outputDirectory);
+                    //Export.CSVExport(calendar, outputDirectory);
                     Export.employeeExport(ScheduleCreator.employeeSet, outputDirectory);
                     showAlert("Success", "Schedule exported successfully.", Alert.AlertType.INFORMATION);
                 } else {

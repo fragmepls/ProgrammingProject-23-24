@@ -20,7 +20,7 @@ public class Employee {
     private int workingHours;
     private boolean fullTimeWorker;
     private List<Vacation> vacationList = new ArrayList<>();
-    private final int employeeId;
+    private int employeeId;
 
     //    An Employee object (Employee) has a list of Vacation objects (vacationList).
     //    This list (vacationList) keeps track of all the vacations an employee has taken or is scheduled to take.
@@ -52,6 +52,10 @@ public class Employee {
 
     public int getEmployeeId() {
         return employeeId;
+    }
+
+    public void setEmployeeId(int employeeId) {
+        this.employeeId = employeeId;
     }
 
     /**

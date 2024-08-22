@@ -108,6 +108,7 @@ public class SchedulePlannerMain {
 
         LocalDate beginDate;
         LocalDate endDate;
+        String path;
 
         while (true) {
             try {
@@ -115,6 +116,8 @@ public class SchedulePlannerMain {
                 beginDate = LocalDate.parse(scanner.nextLine());
                 System.out.print("Enter end date (YYYY-MM-DD): ");
                 endDate = LocalDate.parse(scanner.nextLine());
+                System.out.print("Enter the path to save the CSV and JSON file: ");
+                path = scanner.nextLine();
                 break;
             } catch (DateTimeParseException e) {
                 System.out.println("Invalid date format. Please enter the date in the format YYYY-MM-DD.");
@@ -123,8 +126,8 @@ public class SchedulePlannerMain {
 
         ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, false, DayOfWeek.SATURDAY);
         System.out.println(calendar);
-        Export.CSVExport(calendar, "C:\\Users\\leoob\\Desktop");
-        Export.employeeExport(ScheduleCreator.employeeSet, "C:\\Users\\leoob\\Desktop");
+        //Export.CSVExport(calendar, path);
+        Export.employeeExport(ScheduleCreator.employeeSet, path);
 
         DBUtils.closeConnection(connection);
     }

@@ -19,6 +19,7 @@ public class SQLQueries {
      *
      * @param connection the database connection
      * @param employee   the employee to insert
+     * @return the ID of the inserted employee
      * @throws SQLException if a database access error occurs
      */
     public static int insertEmployee(Connection connection, Employee employee) throws SQLException {
@@ -31,6 +32,37 @@ public class SQLQueries {
             preparedStatement.setInt(4, employee.getWorkingHours());
             preparedStatement.setString(5, employee.getFreeDay().toString());
             preparedStatement.setBoolean(6, employee.isFullTimeWorker());
+
+            preparedStatement.executeUpdate();
+
+            try (PreparedStatement lastInsertIdStatement = connection.prepareStatement("SELECT last_insert_rowid()")) {
+                ResultSet resultSet = lastInsertIdStatement.executeQuery();
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                } else {
+                    throw new SQLException("Creating employee failed, no ID obtained.");
+                }
+            }
+        }
+    }
+
+    /**
+     * Inserts a vacation into the database.
+     *
+     * @param connection the database connection
+     * @param employeeId the ID of the employee
+     * @param startDate  the start date of the vacation
+     * @param endDate    the end date of the vacation
+     * @return the number of rows affected by the query
+     * @throws SQLException if a database access error occurs
+     */
+    public static int insertVacation(Connection connection, int employeeId, String startDate, String endDate) throws SQLException {
+        String sql = "INSERT INTO vacation (employeeId, startDate, endDate) VALUES (?, ?, ?)";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, employeeId);
+            preparedStatement.setString(2, startDate);
+            preparedStatement.setString(3, endDate);
 
             return preparedStatement.executeUpdate();
         }
@@ -57,6 +89,7 @@ public class SQLQueries {
                         resultSet.getString("freeDay"),
                         resultSet.getBoolean("fulltimeWorker")
                 );
+                employee.setEmployeeId(resultSet.getInt("id"));
                 employees.add(employee);
             }
 
@@ -129,6 +162,20 @@ public class SQLQueries {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, id);
 
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * Truncates the employee table.
+     *
+     * @param connection the database connection
+     * @throws SQLException if a database access error occurs
+     */
+    public static void truncateDatabase(Connection connection) throws SQLException {
+        String sql = "DELETE FROM employee; UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = 'employee';";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.executeUpdate();
         }
     }
