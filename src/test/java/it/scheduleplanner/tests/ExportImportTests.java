@@ -4,16 +4,10 @@ import it.scheduleplanner.export.*;
 import it.scheduleplanner.utils.Employee;
 
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 import java.util.Set;
-import java.util.regex.*;
 import java.util.stream.Stream;
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +28,6 @@ public class ExportImportTests {
 	
 	private static final LocalDate BEGIN = LocalDate.of(2024, 8, 14);
 	private static final LocalDate END = LocalDate.of(2024, 8, 22);
-	
-	private static final DateTimeFormatter FORMATTER_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 	
 	private static Set<Employee> employeeSet = Set.of(
 			new Employee("empl1", false, "sunday", false), 

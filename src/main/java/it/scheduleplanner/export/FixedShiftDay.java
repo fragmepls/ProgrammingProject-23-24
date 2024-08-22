@@ -33,7 +33,6 @@ public class FixedShiftDay implements ShiftDayInterface {
         return employees;
     }
 
-    //TODO repair toString
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
