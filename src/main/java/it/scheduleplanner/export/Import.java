@@ -39,7 +39,7 @@ public final class Import {
 	 * @param pathToFile String: the path to the file to import <br>
 	 * The file has to be named after the following format: yyyy-MM-dd.csv for example "somePath2024-01-01.csv"
 	 * @param employeeSet Set of all employees
-	 * @return schedule as instance of ShiftSchedulenterface
+	 * @return schedule as instance of ShiftScheduleInterface
 	 */
 	public static ShiftScheduleInterface importSchedule(String pathToFile, Set<Employee> employeeSet) {
 		LocalDate scheduleStart = findStartDateInFileName(pathToFile);

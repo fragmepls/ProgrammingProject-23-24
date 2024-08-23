@@ -3,6 +3,7 @@ package it.scheduleplanner.gui;
 import it.scheduleplanner.dbutils.DBUtils;
 import it.scheduleplanner.dbutils.SQLQueries;
 import it.scheduleplanner.export.Export;
+import it.scheduleplanner.export.Import;
 import it.scheduleplanner.export.ShiftScheduleInterface;
 import it.scheduleplanner.planner.InsufficientEmployeesException;
 import it.scheduleplanner.planner.ScheduleCreator;
@@ -17,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Main GUI class for the Schedule Planner application.
@@ -71,9 +74,10 @@ public class Gui2 extends Application {
         Tab welcomeTab = welcomeTab();
         Tab employeeTab = createEmployeeTab(primaryStage);
         Tab vacationTab = createVacationTab();
+        Tab importScheduleTab = createImportTab();
         Tab scheduleTab = createScheduleTab(primaryStage);
 
-        tabPane.getTabs().addAll(welcomeTab, employeeTab, vacationTab, scheduleTab);
+        tabPane.getTabs().addAll(welcomeTab, employeeTab, vacationTab, importScheduleTab, scheduleTab);
         mainLayout.setCenter(tabPane);
 
         Scene scene = new Scene(mainLayout, 800, 600); //main scene = a container that has all the elements printed in it
@@ -338,6 +342,51 @@ public class Gui2 extends Application {
         return tab;
     }
 
+
+    /**
+     * Creates the Import Schedule tab.
+     *
+     * @return The Import Schedule tab.
+     */
+    private Tab createImportTab() {
+        Tab tab = new Tab("Import Schedule");
+        VBox vbox = new VBox(10);
+
+        Label instructionLabel = new Label("Select a CSV file to import schedule:");
+        Button chooseFileButton = new Button("Choose File");
+        Label fileLabel = new Label("No file selected");
+
+        chooseFileButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+            File selectedFile = fileChooser.showOpenDialog(null);
+            if (selectedFile != null) {
+                fileLabel.setText("File: " + selectedFile.getAbsolutePath());
+            }
+        });
+
+        Button importButton = new Button("Import Schedule");
+        importButton.setOnAction(e -> {
+            if (fileLabel.getText().equals("No file selected")) {
+                showAlert("File Error", "Please select a file to import.", Alert.AlertType.ERROR);
+            } else {
+                String pathToFile = fileLabel.getText().substring(6); // remove "File: " prefix
+                ShiftScheduleInterface importedSchedule = Import.importSchedule(pathToFile, ScheduleCreator.employeeSet);
+                if (importedSchedule != null) {
+                    showAlert("Success", "Schedule imported successfully.", Alert.AlertType.INFORMATION);
+                    // Update the GUI or data model to reflect the imported schedule
+                } else {
+                    showAlert("Import Error", "Failed to import schedule. Please check the file and try again.", Alert.AlertType.ERROR);
+                }
+            }
+        });
+
+        vbox.getChildren().addAll(instructionLabel, chooseFileButton, fileLabel, importButton);
+        tab.setContent(vbox);
+        return tab;
+    }
+
+
     /**
      * Creates the Schedule Configuration tab.
      *
@@ -361,17 +410,13 @@ public class Gui2 extends Application {
 
         ComboBox<String> restDayComboBox = new ComboBox<>();
         restDayComboBox.getItems().add("NO DAY");
-        restDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values()) //DayOfWeek. values returns an array of the ENUM (MONDAY, TUESDAY...)
-                //Arrays.stream makes out of the array a stream
-                .map(DayOfWeek::toString)                                   //.map is a method of streams that transforms each element of the stream --> here the DayofWeak to String)
-                .toList());                                                 //is a operation of stream, used to store all elements of the stream as an array.
-
-
+        restDayComboBox.getItems().addAll(Arrays.stream(DayOfWeek.values())
+                .map(DayOfWeek::toString)
+                .toList());
         restDayComboBox.setPromptText("Select Rest Day");
 
         Button chooseDirectoryButton = new Button("Choose Output Directory");
         Label directoryLabel = new Label("No directory chosen");
-
 
         chooseDirectoryButton.setOnAction(e -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -441,10 +486,39 @@ public class Gui2 extends Application {
 
         // Button to show employees and overtime hours
         Button showEmployeesButton = new Button("Check overtime hours");
-
-
-
         showEmployeesButton.setOnAction(e -> showEmployeesAndOvertime());
+
+        // New Button to generate empty schedule
+        Button generateEmptyScheduleButton = new Button("Generate Empty Schedule");
+
+        generateEmptyScheduleButton.setOnAction(e -> {
+            LocalDate beginDate = beginDatePicker.getValue();
+            LocalDate endDate = endDatePicker.getValue();
+
+            if (beginDate == null || endDate == null) {
+                showAlert("Input Error", "Please select both a start and end date.", Alert.AlertType.ERROR);
+                return;
+            }
+
+            if (beginDate.isAfter(endDate)) {
+                showAlert("Input Error", "Begin date cannot be after end date.", Alert.AlertType.ERROR);
+                return;
+            }
+
+            if (outputDirectory != null) {
+                // Assuming employeeSet is the set of employees to be passed
+                Set<Employee> employeeSet = ScheduleCreator.employeeSet;
+                Map<Boolean, String> exportResult = Export.exportBlankSchedule(beginDate, endDate, employeeSet, outputDirectory);
+
+                if (exportResult.containsKey(true) && exportResult.get(true) != null) {
+                    showAlert("Success", "Empty schedule exported successfully to: " + exportResult.get(true), Alert.AlertType.INFORMATION);
+                } else {
+                    showAlert("Error", "Failed to export empty schedule. Please check the output directory and try again.", Alert.AlertType.ERROR);
+                }
+            } else {
+                showAlert("Error", "No output directory selected.", Alert.AlertType.ERROR);
+            }
+        });
 
         vbox.getChildren().addAll(
                 new Label("Enter Schedule Configuration:"),
@@ -456,7 +530,8 @@ public class Gui2 extends Application {
                 chooseDirectoryButton,
                 directoryLabel,
                 generateScheduleButton,
-                showEmployeesButton
+                showEmployeesButton,
+                generateEmptyScheduleButton  // Add the new button here
         );
         tab.setContent(vbox);
         return tab;
