@@ -1,11 +1,14 @@
 package it.scheduleplanner.dbutils;
 
 import it.scheduleplanner.utils.Employee;
+import it.scheduleplanner.utils.Vacation;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,6 +69,24 @@ public class SQLQueries {
 
             return preparedStatement.executeUpdate();
         }
+    }
+
+    public static List<Vacation> selectVacation(Connection connection, int employeeId) throws SQLException {
+        String sql = "SELECT * FROM vacation WHERE employeeId = ?";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        List<Vacation> vacations = new ArrayList<>();
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, employeeId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                vacations.add(new Vacation(
+                        LocalDate.parse(resultSet.getString("startDate"), formatter),
+                        LocalDate.parse(resultSet.getString("endDate"), formatter)
+                ));
+            }
+        }
+        return vacations;
     }
 
     /**

@@ -31,7 +31,7 @@ public class DBUtils {
                 + "employeeId INTEGER NOT NULL,"
                 + "startDate TEXT NOT NULL,"
                 + "endDate TEXT NOT NULL,"
-                + "FOREIGN KEY(employeeId) REFERENCES employee(id));";
+                + "FOREIGN KEY(employeeId) REFERENCES employee(id) ON DELETE CASCADE);";
 
         try (Connection connection = getConnection();
              Statement statement = connection.createStatement()) {

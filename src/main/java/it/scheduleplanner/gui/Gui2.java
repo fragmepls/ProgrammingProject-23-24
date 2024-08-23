@@ -189,6 +189,15 @@ public class Gui2 extends Application {
             fullTimeCheckBox.setSelected(false);
         });
 
+        Button importButton = new Button("Import Employees from Database");
+
+        importButton.setOnAction(e -> {
+            try {
+                employeeList.addAll(SQLQueries.selectAllEmployees(connection));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         Button viewEmployeesButton = new Button("View Employees");
         viewEmployeesButton.setOnAction(e -> showEmployeeList(primaryStage));
@@ -337,7 +346,29 @@ public class Gui2 extends Application {
             endDatePicker.setValue(null);
         });
 
-        vbox.getChildren().addAll(new Label("Enter Vacation Details:"), employeeComboBox, startDatePicker, endDatePicker, addVacationButton);
+        Button importVacationsButton = new Button("Import Vacation for Employee");
+
+        importVacationsButton.setOnAction(e -> {
+            try {
+                Employee employee = employeeComboBox.getValue();
+                if (employee == null) {
+                    showAlert("Input Error", "Please select an employee.", Alert.AlertType.ERROR);
+                } else {
+                    List<Vacation> vacations = SQLQueries.selectVacation(connection, employee.getEmployeeId());
+                    if (vacations.isEmpty()) {
+                        showAlert("No Vacations Found", "No vacations were found for the selected employee.", Alert.AlertType.INFORMATION);
+                    } else {
+                        for (Vacation vacation : vacations) {
+                            employee.addVacation(vacation);
+                        }
+                    }
+                }
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        vbox.getChildren().addAll(new Label("Enter Vacation Details:"), employeeComboBox, startDatePicker, endDatePicker, addVacationButton, importVacationsButton);
         tab.setContent(vbox);
         return tab;
     }
@@ -418,6 +449,7 @@ public class Gui2 extends Application {
         Button chooseDirectoryButton = new Button("Choose Output Directory");
         Label directoryLabel = new Label("No directory chosen");
 
+
         chooseDirectoryButton.setOnAction(e -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             directoryChooser.setTitle("Select Output Directory");
@@ -486,6 +518,9 @@ public class Gui2 extends Application {
 
         // Button to show employees and overtime hours
         Button showEmployeesButton = new Button("Check overtime hours");
+
+
+
         showEmployeesButton.setOnAction(e -> showEmployeesAndOvertime());
 
         // New Button to generate empty schedule
@@ -530,8 +565,7 @@ public class Gui2 extends Application {
                 chooseDirectoryButton,
                 directoryLabel,
                 generateScheduleButton,
-                showEmployeesButton,
-                generateEmptyScheduleButton  // Add the new button here
+                showEmployeesButton
         );
         tab.setContent(vbox);
         return tab;
