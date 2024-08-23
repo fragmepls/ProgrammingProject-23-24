@@ -26,6 +26,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,7 +57,6 @@ public class Gui2 extends Application {
     public void start(Stage primaryStage) throws SQLException {
         DBUtils.initializeDatabase();
         connection = DBUtils.getConnection();
-        //SQLQueries.truncateDatabase(connection);
 
         primaryStage.setTitle("Schedule Planner"); //like the primary window
 
@@ -159,8 +159,6 @@ public class Gui2 extends Application {
 
         Button addButton = new Button("Add Employee");
 
-
-
         addButton.setOnAction(event -> {   //lambda expression -- usually used in Java with functional Interfaces
             String name = nameField.getText();
             boolean isWeekendWorker = weekendWorkerCheckBox.isSelected();
@@ -185,6 +183,15 @@ public class Gui2 extends Application {
             fullTimeCheckBox.setSelected(false);
         });
 
+        Button importButton = new Button("Import Employees from Database");
+
+        importButton.setOnAction(e -> {
+            try {
+                employeeList.addAll(SQLQueries.selectAllEmployees(connection));
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         Button viewEmployeesButton = new Button("View Employees");
         viewEmployeesButton.setOnAction(e -> showEmployeeList(primaryStage));
@@ -192,7 +199,7 @@ public class Gui2 extends Application {
         vbox.getChildren().addAll(
                 new Label("Enter Employee Name:"), nameField, weekendWorkerCheckBox,
                 new Label("Select a fixed free Day:"),
-                freeDayComboBox, fullTimeCheckBox, addButton, viewEmployeesButton
+                freeDayComboBox, fullTimeCheckBox, addButton, importButton, viewEmployeesButton
         );
         tab.setContent(vbox);
         return tab;
@@ -259,7 +266,6 @@ public class Gui2 extends Application {
         employeeListStage.show();
     }
 
-
     /**
      * Creates the Vacation tab.
      *
@@ -304,8 +310,6 @@ public class Gui2 extends Application {
 
         Button addVacationButton = new Button("Add Vacation");
 
-
-
         addVacationButton.setOnAction(e -> {                //lambda expression
             Employee employee = employeeComboBox.getValue();
             LocalDate startDate = startDatePicker.getValue();
@@ -333,7 +337,29 @@ public class Gui2 extends Application {
             endDatePicker.setValue(null);
         });
 
-        vbox.getChildren().addAll(new Label("Enter Vacation Details:"), employeeComboBox, startDatePicker, endDatePicker, addVacationButton);
+        Button importVacationsButton = new Button("Import Vacation for Employee");
+
+        importVacationsButton.setOnAction(e -> {
+            try {
+                Employee employee = employeeComboBox.getValue();
+                if (employee == null) {
+                    showAlert("Input Error", "Please select an employee.", Alert.AlertType.ERROR);
+                } else {
+                    List<Vacation> vacations = SQLQueries.selectVacation(connection, employee.getEmployeeId());
+                    if (vacations.isEmpty()) {
+                        showAlert("No Vacations Found", "No vacations were found for the selected employee.", Alert.AlertType.INFORMATION);
+                    } else {
+                        for (Vacation vacation : vacations) {
+                            employee.addVacation(vacation);
+                        }
+                    }
+                }
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        vbox.getChildren().addAll(new Label("Enter Vacation Details:"), employeeComboBox, startDatePicker, endDatePicker, addVacationButton, importVacationsButton);
         tab.setContent(vbox);
         return tab;
     }
@@ -366,12 +392,10 @@ public class Gui2 extends Application {
                 .map(DayOfWeek::toString)                                   //.map is a method of streams that transforms each element of the stream --> here the DayofWeak to String)
                 .toList());                                                 //is a operation of stream, used to store all elements of the stream as an array.
 
-
         restDayComboBox.setPromptText("Select Rest Day");
 
         Button chooseDirectoryButton = new Button("Choose Output Directory");
         Label directoryLabel = new Label("No directory chosen");
-
 
         chooseDirectoryButton.setOnAction(e -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -441,8 +465,6 @@ public class Gui2 extends Application {
 
         // Button to show employees and overtime hours
         Button showEmployeesButton = new Button("Check overtime hours");
-
-
 
         showEmployeesButton.setOnAction(e -> showEmployeesAndOvertime());
 
