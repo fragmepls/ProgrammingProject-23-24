@@ -11,8 +11,8 @@ public interface ShiftScheduleInterface {
 
 	/**
 	 * This method may be used to add a Day to the schedule mapped to its Date.
-	 * @param date
-	 * @param workDay
+	 * @param date Date of the day
+	 * @param day Day to be added
 	 */
 	public void addDay(LocalDate date, ShiftDayInterface day);
 
@@ -28,4 +28,12 @@ public interface ShiftScheduleInterface {
 	 */
 	public Map<LocalDate, ShiftDayInterface> getSchedule();
 
+	/**
+	 * this method returns the day mapped to the date in the input.
+	 * @param date Date of desired day
+	 * @return day mapped to the date
+	 */
+	ShiftDayInterface getDay(LocalDate date);
+
+	String toString();
 }
