@@ -1,33 +1,22 @@
 package it.scheduleplanner.gui;
 
-import it.scheduleplanner.dbutils.DBUtils;
-import it.scheduleplanner.dbutils.SQLQueries;
-import it.scheduleplanner.export.Export;
-import it.scheduleplanner.export.Import;
-import it.scheduleplanner.export.ShiftScheduleInterface;
-import it.scheduleplanner.planner.InsufficientEmployeesException;
-import it.scheduleplanner.planner.ScheduleCreator;
-import it.scheduleplanner.utils.Employee;
-import it.scheduleplanner.utils.Vacation;
-import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
+import it.scheduleplanner.dbutils.*;
+import it.scheduleplanner.export.*;
+import it.scheduleplanner.planner.*;
+import it.scheduleplanner.utils.*;
+import javafx.application.*;
+import javafx.beans.property.*;
+import javafx.collections.*;
+import javafx.geometry.*;
+import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javafx.stage.*;
 
-import java.io.File;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
+import java.io.*;
+import java.sql.*;
+import java.time.*;
 import java.util.*;
-
 /**
  * Main GUI class for the Schedule Planner application.
  */
@@ -36,6 +25,7 @@ public class Gui2 extends Application {
     private Connection connection;
     private ObservableList<Employee> employeeList = FXCollections.observableArrayList();
     private String outputDirectory;
+    private ShiftScheduleInterface calendar;  // Neue Variable für den Kalender
 
     /**
      * Main method to launch the application.
@@ -52,32 +42,31 @@ public class Gui2 extends Application {
      * @param primaryStage The primary stage.
      * @throws SQLException If a database access error occurs.
      */
+
     @Override
     public void start(Stage primaryStage) throws SQLException {
         DBUtils.initializeDatabase();
         connection = DBUtils.getConnection();
-        //SQLQueries.truncateDatabase(connection);
 
-        primaryStage.setTitle("Schedule Planner"); //like the primary window
+        primaryStage.setTitle("Schedule Planner");
 
-        // Main layout
-        BorderPane mainLayout = new BorderPane(); //sets the layout for the primaryStage
+        BorderPane mainLayout = new BorderPane();
         mainLayout.setPadding(new Insets(10, 10, 10, 10));
 
-        // Creating Tabs
-        TabPane tabPane = new TabPane(); //allows to create this "tab-layout"
+        TabPane tabPane = new TabPane();
 
-        //tabs get created here
         Tab welcomeTab = welcomeTab();
         Tab employeeTab = createEmployeeTab(primaryStage);
         Tab vacationTab = createVacationTab();
         Tab importScheduleTab = createImportTab();
         Tab scheduleTab = createScheduleTab(primaryStage);
+        Tab modifyShiftsTab = createShiftModificationTab();
 
-        tabPane.getTabs().addAll(welcomeTab, employeeTab, vacationTab, importScheduleTab, scheduleTab);
+        tabPane.getTabs().addAll(welcomeTab, employeeTab, vacationTab,
+                importScheduleTab, scheduleTab, modifyShiftsTab);
         mainLayout.setCenter(tabPane);
 
-        Scene scene = new Scene(mainLayout, 800, 600); //main scene = a container that has all the elements printed in it
+        Scene scene = new Scene(mainLayout, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -132,6 +121,154 @@ public class Gui2 extends Application {
         return tab;
     }
 
+    /**
+     * Creates the Vacation tab.
+     *
+     * @return The Vacation tab.
+     */
+    private Tab createVacationTab() {
+        Tab tab = new Tab("Send Employee on Vacation");
+        VBox vbox = new VBox(10);
+
+        ComboBox<Employee> employeeComboBox = new ComboBox<>(employeeList); // Bind the employee list to the ComboBox
+
+        // Customize the ComboBox to display employee names
+        employeeComboBox.setCellFactory(param -> new ListCell<>() {
+            @Override
+            protected void updateItem(Employee employee, boolean empty) {
+                super.updateItem(employee, empty);
+                if (empty || employee == null || employee.getName() == null) {
+                    setText(null);
+                }
+                else {
+                    setText(employee.getName());
+                }
+            }
+        });
+
+        employeeComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Employee employee, boolean empty) {
+                super.updateItem(employee, empty);
+                if (empty || employee == null || employee.getName() == null) {
+                    setText(null);
+                }
+                else {
+                    setText(employee.getName());
+                }
+            }
+        });
+
+        DatePicker startDatePicker = new DatePicker();
+        startDatePicker.setPromptText("Start Date");
+
+        DatePicker endDatePicker = new DatePicker();
+        endDatePicker.setPromptText("End Date");
+
+        Button addVacationButton = new Button("Add Vacation");
+
+
+        addVacationButton.setOnAction(e -> {                //lambda expression
+            Employee employee = employeeComboBox.getValue();
+            LocalDate startDate = startDatePicker.getValue();
+            LocalDate endDate = endDatePicker.getValue();
+
+            if (employee == null || startDate == null || endDate == null) {
+                showAlert("Input Error", "Some of the inputs are wrong, try again.", Alert.AlertType.ERROR);
+                return;
+            }
+
+            if (startDate.isAfter(endDate)) {
+                showAlert("Input Error", "Start date cannot be after end date.", Alert.AlertType.ERROR);
+                return;
+            }
+
+            Vacation vacation = new Vacation(startDate, endDate);
+            employee.addVacation(vacation);
+            try {
+                SQLQueries.insertVacation(connection, employee.getEmployeeId(), startDate.toString(), endDate.toString());
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            startDatePicker.setValue(null);
+            endDatePicker.setValue(null);
+        });
+
+        Button importVacationsButton = new Button("Import Vacation for Employee");
+
+        importVacationsButton.setOnAction(e -> {
+            try {
+                Employee employee = employeeComboBox.getValue();
+                if (employee == null) {
+                    showAlert("Input Error", "Please select an employee.", Alert.AlertType.ERROR);
+                }
+                else {
+                    List<Vacation> vacations = SQLQueries.selectVacation(connection, employee.getEmployeeId());
+                    if (vacations.isEmpty()) {
+                        showAlert("No Vacations Found", "No vacations were found for the selected employee.", Alert.AlertType.INFORMATION);
+                    }
+                    else {
+                        for (Vacation vacation : vacations) {
+                            employee.addVacation(vacation);
+                        }
+                    }
+                }
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        vbox.getChildren().addAll(new Label("Enter Vacation Details:"), employeeComboBox, startDatePicker, endDatePicker, addVacationButton, importVacationsButton);
+        tab.setContent(vbox);
+        return tab;
+    }
+
+
+    /**
+     * Creates the Import Schedule tab.
+     *
+     * @return The Import Schedule tab.
+     */
+    private Tab createImportTab() {
+        Tab tab = new Tab("Import Schedule");
+        VBox vbox = new VBox(10);
+
+        Label instructionLabel = new Label("Select a CSV file to import schedule:");
+        Button chooseFileButton = new Button("Choose File");
+        Label fileLabel = new Label("No file selected");
+
+        chooseFileButton.setOnAction(e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+            File selectedFile = fileChooser.showOpenDialog(null);
+            if (selectedFile != null) {
+                fileLabel.setText("File: " + selectedFile.getAbsolutePath());
+            }
+        });
+
+        Button importButton = new Button("Import Schedule");
+        importButton.setOnAction(e -> {
+            if (fileLabel.getText().equals("No file selected")) {
+                showAlert("File Error", "Please select a file to import.", Alert.AlertType.ERROR);
+            }
+            else {
+                String pathToFile = fileLabel.getText().substring(6); // remove "File: " prefix
+                ShiftScheduleInterface importedSchedule = Import.importSchedule(pathToFile, ScheduleCreator.employeeSet);
+                if (importedSchedule != null) {
+                    showAlert("Success", "Schedule imported successfully.", Alert.AlertType.INFORMATION);
+                    // Update the GUI or data model to reflect the imported schedule
+                }
+                else {
+                    showAlert("Import Error", "Failed to import schedule. Please check the file and try again.", Alert.AlertType.ERROR);
+                }
+            }
+        });
+
+        vbox.getChildren().addAll(instructionLabel, chooseFileButton, fileLabel, importButton);
+        tab.setContent(vbox);
+        return tab;
+    }
 
     /**
      * Creates the Employee tab.
@@ -159,7 +296,6 @@ public class Gui2 extends Application {
         CheckBox fullTimeCheckBox = new CheckBox("Is Full Time");
 
         Button addButton = new Button("Add Employee");
-
 
 
         addButton.setOnAction(event -> {   //lambda expression -- usually used in Java with functional Interfaces
@@ -209,218 +345,182 @@ public class Gui2 extends Application {
     }
 
     /**
-     * Displays the list of employees in a new window.
+     * Creates the Shift Modification tab.
      *
-     * @param primaryStage The primary stage.
+     * @return The Shift Modification tab.
      */
-    private void showEmployeeList(Stage primaryStage) {
-        Stage employeeListStage = new Stage();
-        employeeListStage.setTitle("Employee List");
-
+    private Tab createShiftModificationTab() {
+        Tab tab = new Tab("Modify Shifts");
         VBox vbox = new VBox(10);
-        vbox.setPadding(new Insets(10, 10, 10, 10));
+        vbox.setPadding(new Insets(10));
 
-        for (Employee employee : employeeList) {
-            HBox employeeRow = new HBox(10);
-            Label employeeLabel = new Label(employee.getName());
+        // Date selection
+        DatePicker datePicker = new DatePicker();
+        datePicker.setPromptText("Select Date");
 
-            Button deleteButton = new Button("Delete");
-            deleteButton.setOnAction(e -> {
-                try {
-                    SQLQueries.deleteEmployee(connection, employee.getEmployeeId());
-                    employeeList.remove(employee);
-                    vbox.getChildren().remove(employeeRow);
-                } catch (SQLException ex) {
-                    showAlert("Deletion Error", "Failed to delete the employee.", Alert.AlertType.ERROR);
-                    ex.printStackTrace();
-                }
-            });
+        // Employee selection
+        ComboBox<Employee> employeeComboBox = new ComboBox<>(employeeList);
+        employeeComboBox.setPromptText("Select Employee");
 
-            employeeRow.getChildren().addAll(employeeLabel, deleteButton);
-            vbox.getChildren().add(employeeRow);
-        }
-
-        Button deleteAllButton = new Button("Delete All Employees");
-        deleteAllButton.setOnAction(e -> {
-            try {
-                // Delete all employees from the database
-                for (Employee employee : new ArrayList<>(employeeList)) {
-                    SQLQueries.deleteEmployee(connection, employee.getEmployeeId());
-                }
-                employeeList.clear();
-                vbox.getChildren().clear();
-                vbox.getChildren().add(deleteAllButton);  // Re-add the Delete All button
-            } catch (SQLException ex) {
-                showAlert("Deletion Error", "Failed to delete all employees.", Alert.AlertType.ERROR);
-                ex.printStackTrace();
-            }
-        });
-
-        ScrollPane scrollPane = new ScrollPane();
-        scrollPane.setContent(vbox);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-
-        vbox.getChildren().add(deleteAllButton);  // Add the Delete All button at the bottom
-
-        Scene scene = new Scene(scrollPane, 400, 300);
-        employeeListStage.setScene(scene);
-        employeeListStage.initOwner(primaryStage);
-        employeeListStage.show();
-    }
-
-
-    /**
-     * Creates the Vacation tab.
-     *
-     * @return The Vacation tab.
-     */
-    private Tab createVacationTab() {
-        Tab tab = new Tab("Send Employee on Vacation");
-        VBox vbox = new VBox(10);
-
-        ComboBox<Employee> employeeComboBox = new ComboBox<>(employeeList); // Bind the employee list to the ComboBox
-
-        // Customize the ComboBox to display employee names
+        // Configure employee display
         employeeComboBox.setCellFactory(param -> new ListCell<>() {
             @Override
             protected void updateItem(Employee employee, boolean empty) {
                 super.updateItem(employee, empty);
-                if (empty || employee == null || employee.getName() == null) {
-                    setText(null);
-                } else {
-                    setText(employee.getName());
-                }
+                setText(empty || employee == null ? null : employee.getName());
             }
         });
+        employeeComboBox.setButtonCell(employeeComboBox.getCellFactory().call(null));
 
-        employeeComboBox.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(Employee employee, boolean empty) {
-                super.updateItem(employee, empty);
-                if (empty || employee == null || employee.getName() == null) {
-                    setText(null);
-                } else {
-                    setText(employee.getName());
-                }
+        // Shift selection
+        ComboBox<Shift> shiftComboBox = new ComboBox<>();
+        shiftComboBox.getItems().addAll(Shift.MORNING, Shift.AFTERNOON, Shift.FULL);
+        shiftComboBox.setPromptText("Select Shift");
+
+        // Display current schedule
+        TextArea currentScheduleArea = new TextArea();
+        currentScheduleArea.setEditable(false);
+        currentScheduleArea.setPrefRowCount(5);
+        currentScheduleArea.setWrapText(true);
+
+        // Button to view current schedule
+        Button viewCurrentButton = new Button("View Current Schedule");
+        viewCurrentButton.setOnAction(e -> {
+            if (calendar == null || datePicker.getValue() == null) {
+                showAlert("Error", "Please select a date and ensure a schedule exists.", Alert.AlertType.ERROR);
+                return;
             }
+            ShiftDayInterface day = calendar.getDay(datePicker.getValue());
+            if (day == null) {
+                currentScheduleArea.setText("No schedule for selected date.");
+                return;
+            }
+            StringBuilder schedule = new StringBuilder("Current assignments:\n");
+            Map<Employee, Shift> assignments = day.getEmployees();
+            assignments.forEach((emp, shift) ->
+                    schedule.append(emp.getName()).append(": ").append(shift).append("\n")
+            );
+            currentScheduleArea.setText(schedule.toString());
         });
 
-        DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setPromptText("Start Date");
-
-        DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setPromptText("End Date");
-
-        Button addVacationButton = new Button("Add Vacation");
-
-
-
-        addVacationButton.setOnAction(e -> {                //lambda expression
+        // Button for shift modification
+        Button modifyButton = new Button("Modify Shift");
+        modifyButton.setOnAction(e -> {
+            LocalDate date = datePicker.getValue();
             Employee employee = employeeComboBox.getValue();
-            LocalDate startDate = startDatePicker.getValue();
-            LocalDate endDate = endDatePicker.getValue();
+            Shift newShift = shiftComboBox.getValue();
 
-            if (employee == null || startDate == null || endDate == null) {
-                showAlert("Input Error", "Some of the inputs are wrong, try again.", Alert.AlertType.ERROR);
+            if (date == null || employee == null || newShift == null) {
+                showAlert("Input Error", "Please select date, employee, and shift.", Alert.AlertType.ERROR);
                 return;
             }
 
-            if (startDate.isAfter(endDate)) {
-                showAlert("Input Error", "Start date cannot be after end date.", Alert.AlertType.ERROR);
+            if (calendar == null) {
+                showAlert("Error", "No schedule available. Please generate a schedule first.", Alert.AlertType.ERROR);
                 return;
             }
 
-            Vacation vacation = new Vacation(startDate, endDate);
-            employee.addVacation(vacation);
-            try {
-                SQLQueries.insertVacation(connection, employee.getEmployeeId(), startDate.toString(), endDate.toString());
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
+            if (!ShiftModifier.isModificationAllowed(employee, newShift)) {
+                showAlert("Error", "Employee does not have enough working hours available.", Alert.AlertType.ERROR);
+                return;
             }
 
-            startDatePicker.setValue(null);
-            endDatePicker.setValue(null);
-        });
-
-        Button importVacationsButton = new Button("Import Vacation for Employee");
-
-        importVacationsButton.setOnAction(e -> {
             try {
-                Employee employee = employeeComboBox.getValue();
-                if (employee == null) {
-                    showAlert("Input Error", "Please select an employee.", Alert.AlertType.ERROR);
-                } else {
-                    List<Vacation> vacations = SQLQueries.selectVacation(connection, employee.getEmployeeId());
-                    if (vacations.isEmpty()) {
-                        showAlert("No Vacations Found", "No vacations were found for the selected employee.", Alert.AlertType.INFORMATION);
-                    } else {
-                        for (Vacation vacation : vacations) {
-                            employee.addVacation(vacation);
-                        }
-                    }
+                if (ShiftModifier.modifyShift(calendar, date, employee, newShift)) {
+                    showAlert("Success", "Shift modified successfully.", Alert.AlertType.INFORMATION);
+                    // Update display
+                    viewCurrentButton.fire();
+                    updateScheduleDisplay();
                 }
-            } catch (SQLException ex) {
-                throw new RuntimeException(ex);
+                else {
+                    showAlert("Error", "Failed to modify shift.", Alert.AlertType.ERROR);
+                }
+            } catch (Exception ex) {
+                showAlert("Error", "An error occurred: " + ex.getMessage(), Alert.AlertType.ERROR);
             }
         });
 
-        vbox.getChildren().addAll(new Label("Enter Vacation Details:"), employeeComboBox, startDatePicker, endDatePicker, addVacationButton, importVacationsButton);
-        tab.setContent(vbox);
+        // Shift swap section
+        Label swapLabel = new Label("Swap Shifts Between Employees");
+        swapLabel.setStyle("-fx-font-weight: bold; -fx-padding: 10 0 5 0;");
+
+        ComboBox<Employee> employee1ComboBox = new ComboBox<>(employeeList);
+        employee1ComboBox.setPromptText("Select First Employee");
+        ComboBox<Employee> employee2ComboBox = new ComboBox<>(employeeList);
+        employee2ComboBox.setPromptText("Select Second Employee");
+
+        // Configure employee display for swap
+        employee1ComboBox.setCellFactory(employeeComboBox.getCellFactory());
+        employee2ComboBox.setCellFactory(employeeComboBox.getCellFactory());
+
+        Button swapButton = new Button("Swap Shifts");
+        swapButton.setOnAction(e -> {
+            LocalDate date = datePicker.getValue();
+            Employee emp1 = employee1ComboBox.getValue();
+            Employee emp2 = employee2ComboBox.getValue();
+
+            if (date == null || emp1 == null || emp2 == null) {
+                showAlert("Input Error", "Please select date and both employees.", Alert.AlertType.ERROR);
+                return;
+            }
+
+            if (calendar == null) {
+                showAlert("Error", "No schedule available. Please generate a schedule first.", Alert.AlertType.ERROR);
+                return;
+            }
+
+            try {
+                if (ShiftModifier.swapShifts(calendar, date, emp1, emp2)) {
+                    showAlert("Success", "Shifts swapped successfully.", Alert.AlertType.INFORMATION);
+                    viewCurrentButton.fire();
+                    updateScheduleDisplay();
+                }
+                else {
+                    showAlert("Error", "Failed to swap shifts.", Alert.AlertType.ERROR);
+                }
+            } catch (Exception ex) {
+                showAlert("Error", "An error occurred: " + ex.getMessage(), Alert.AlertType.ERROR);
+            }
+        });
+
+        // Assemble the layout
+        vbox.getChildren().addAll(
+                new Label("Select Date:"),
+                datePicker,
+                new Label("Current Schedule:"),
+                currentScheduleArea,
+                viewCurrentButton,
+                new Separator(),
+                new Label("Modify Individual Shift:"),
+                employeeComboBox,
+                shiftComboBox,
+                modifyButton,
+                new Separator(),
+                swapLabel,
+                new Label("First Employee:"),
+                employee1ComboBox,
+                new Label("Second Employee:"),
+                employee2ComboBox,
+                swapButton
+        );
+
+        ScrollPane scrollPane = new ScrollPane(vbox);
+        scrollPane.setFitToWidth(true);
+        tab.setContent(scrollPane);
         return tab;
     }
 
+    private void updateScheduleDisplay() {
+        if (outputDirectory != null && calendar != null) {
+            Map<Boolean, String> exportResult = Export.CSVExport(calendar,
+                    ScheduleCreator.employeeSet, outputDirectory);
 
-    /**
-     * Creates the Import Schedule tab.
-     *
-     * @return The Import Schedule tab.
-     */
-    private Tab createImportTab() {
-        Tab tab = new Tab("Import Schedule");
-        VBox vbox = new VBox(10);
-
-        Label instructionLabel = new Label("Select a CSV file to import schedule:");
-        Button chooseFileButton = new Button("Choose File");
-        Label fileLabel = new Label("No file selected");
-
-        chooseFileButton.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-            File selectedFile = fileChooser.showOpenDialog(null);
-            if (selectedFile != null) {
-                fileLabel.setText("File: " + selectedFile.getAbsolutePath());
+            if (!exportResult.containsKey(true) || exportResult.get(true) == null) {
+                showAlert("Export Error", "Failed to update schedule export", Alert.AlertType.WARNING);
             }
-        });
-
-        Button importButton = new Button("Import Schedule");
-        importButton.setOnAction(e -> {
-            if (fileLabel.getText().equals("No file selected")) {
-                showAlert("File Error", "Please select a file to import.", Alert.AlertType.ERROR);
-            } else {
-                String pathToFile = fileLabel.getText().substring(6); // remove "File: " prefix
-                ShiftScheduleInterface importedSchedule = Import.importSchedule(pathToFile, ScheduleCreator.employeeSet);
-                if (importedSchedule != null) {
-                    showAlert("Success", "Schedule imported successfully.", Alert.AlertType.INFORMATION);
-                    // Update the GUI or data model to reflect the imported schedule
-                } else {
-                    showAlert("Import Error", "Failed to import schedule. Please check the file and try again.", Alert.AlertType.ERROR);
-                }
-            }
-        });
-
-        vbox.getChildren().addAll(instructionLabel, chooseFileButton, fileLabel, importButton);
-        tab.setContent(vbox);
-        return tab;
+        }
     }
 
-
-    /**
-     * Creates the Schedule Configuration tab.
-     *
-     * @param primaryStage The primary stage.
-     * @return The Schedule Configuration tab.
-     */
     private Tab createScheduleTab(Stage primaryStage) {
         Tab tab = new Tab("Schedule Configuration");
         VBox vbox = new VBox(10);
@@ -445,7 +545,6 @@ public class Gui2 extends Application {
 
         Button chooseDirectoryButton = new Button("Choose Output Directory");
         Label directoryLabel = new Label("No directory chosen");
-
 
         chooseDirectoryButton.setOnAction(e -> {
             DirectoryChooser directoryChooser = new DirectoryChooser();
@@ -487,21 +586,22 @@ public class Gui2 extends Application {
                 ArrayList<Employee> arrayList = new ArrayList<>(employeeList);
                 ScheduleCreator.addEmployeeList(arrayList);
 
-                ShiftScheduleInterface calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, weekendOpen, restDayEnum);
+                // Hier wird der calendar gesetzt
+                calendar = ScheduleCreator.create(beginDate, endDate, numberOfEmployeesPerDay, weekendOpen, restDayEnum);
 
                 if (outputDirectory != null) {
-                    // Export the schedule to a CSV file
                     Map<Boolean, String> exportResult = Export.CSVExport(calendar, ScheduleCreator.employeeSet, outputDirectory);
 
                     if (exportResult.containsKey(true) && exportResult.get(true) != null) {
                         showAlert("Success", "Schedule exported successfully to: " + exportResult.get(true), Alert.AlertType.INFORMATION);
-                    } else {
+                    }
+                    else {
                         showAlert("Error", "Failed to export schedule. Please check the output directory and try again.", Alert.AlertType.ERROR);
                     }
 
-                    // Optionally export employee data as well
                     Export.employeeExport(ScheduleCreator.employeeSet, outputDirectory);
-                } else {
+                }
+                else {
                     System.out.println("No output directory selected.");
                 }
             } catch (NumberFormatException ex) {
@@ -513,16 +613,10 @@ public class Gui2 extends Application {
             }
         });
 
-        // Button to show employees and overtime hours
         Button showEmployeesButton = new Button("Check overtime hours");
-
-
-
         showEmployeesButton.setOnAction(e -> showEmployeesAndOvertime());
 
-        // New Button to generate empty schedule
         Button generateEmptyScheduleButton = new Button("Generate Empty Schedule");
-
         generateEmptyScheduleButton.setOnAction(e -> {
             LocalDate beginDate = beginDatePicker.getValue();
             LocalDate endDate = endDatePicker.getValue();
@@ -538,16 +632,17 @@ public class Gui2 extends Application {
             }
 
             if (outputDirectory != null) {
-                // Assuming employeeSet is the set of employees to be passed
                 Set<Employee> employeeSet = ScheduleCreator.employeeSet;
                 Map<Boolean, String> exportResult = Export.exportBlankSchedule(beginDate, endDate, employeeSet, outputDirectory);
 
                 if (exportResult.containsKey(true) && exportResult.get(true) != null) {
                     showAlert("Success", "Empty schedule exported successfully to: " + exportResult.get(true), Alert.AlertType.INFORMATION);
-                } else {
+                }
+                else {
                     showAlert("Error", "Failed to export empty schedule. Please check the output directory and try again.", Alert.AlertType.ERROR);
                 }
-            } else {
+            }
+            else {
                 showAlert("Error", "No output directory selected.", Alert.AlertType.ERROR);
             }
         });
@@ -562,15 +657,13 @@ public class Gui2 extends Application {
                 chooseDirectoryButton,
                 directoryLabel,
                 generateScheduleButton,
-                showEmployeesButton
+                showEmployeesButton,
+                generateEmptyScheduleButton
         );
         tab.setContent(vbox);
         return tab;
     }
 
-    /**
-     * Shows a new window displaying employees and their overtime hours.
-     */
     private void showEmployeesAndOvertime() {
         Stage employeeOvertimeStage = new Stage();
         employeeOvertimeStage.setTitle("Employees and Overtime Hours");
@@ -578,30 +671,79 @@ public class Gui2 extends Application {
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10, 10, 10, 10));
 
-        // Example logic to print employees and overtime hours
         for (Employee employee : employeeList) {
             String employeeInfo = employee.getName() + ": " + employee.getOverTimeHours() + " hours overtime";
             vbox.getChildren().add(new Label(employeeInfo));
         }
 
-        // Create a ScrollPane and set VBox as its content
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(vbox);
-        scrollPane.setFitToWidth(true); // Enable horizontal scroll if needed
-        scrollPane.setFitToHeight(true); // Enable vertical scroll
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
 
-        Scene scene = new Scene(scrollPane, 400, 300); // Adjust size as needed
+        Scene scene = new Scene(scrollPane, 400, 300);
         employeeOvertimeStage.setScene(scene);
         employeeOvertimeStage.show();
     }
 
+    private void showEmployeeList(Stage primaryStage) {
+        Stage employeeListStage = new Stage();
+        employeeListStage.setTitle("Employee List");
 
-    /**
-     * Displays an alert with a given title and message.
-     *
-     * @param title   The title of the alert.
-     * @param message The message of the alert.
-     */
+        VBox vbox = new VBox(10);
+        vbox.setPadding(new Insets(10, 10, 10, 10));
+
+        for (Employee employee : employeeList) {
+            HBox employeeRow = new HBox(10);
+            Label employeeLabel = new Label(employee.getName());
+
+            Button deleteButton = new Button("Delete");
+            deleteButton.setOnAction(e -> {
+                try {
+                    SQLQueries.deleteEmployee(connection, employee.getEmployeeId());
+                    employeeList.remove(employee);
+                    vbox.getChildren().remove(employeeRow);
+                } catch (SQLException ex) {
+                    showAlert("Deletion Error", "Failed to delete the employee.", Alert.AlertType.ERROR);
+                    ex.printStackTrace();
+                }
+            });
+
+            employeeRow.getChildren().addAll(employeeLabel, deleteButton);
+            vbox.getChildren().add(employeeRow);
+        }
+
+        Button deleteAllButton = new Button("Delete All Employees");
+        deleteAllButton.setOnAction(e -> {
+            try {
+                for (Employee employee : new ArrayList<>(employeeList)) {
+                    SQLQueries.deleteEmployee(connection, employee.getEmployeeId());
+                }
+                employeeList.clear();
+                vbox.getChildren().clear();
+                vbox.getChildren().add(deleteAllButton);
+
+                // Reset calendar when all employees are deleted
+                calendar = null;
+            } catch (SQLException ex) {
+                showAlert("Deletion Error", "Failed to delete all employees.", Alert.AlertType.ERROR);
+                ex.printStackTrace();
+            }
+        });
+
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setContent(vbox);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+
+        vbox.getChildren().add(deleteAllButton);
+
+        Scene scene = new Scene(scrollPane, 400, 300);
+        employeeListStage.setScene(scene);
+        employeeListStage.initOwner(primaryStage);
+        employeeListStage.show();
+    }
+
     private void showAlert(String title, String message, Alert.AlertType alertType) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
@@ -610,12 +752,45 @@ public class Gui2 extends Application {
         alert.showAndWait();
     }
 
-
     /**
-     * Stops the application and closes the database connection.
-     *
-     * @throws Exception If an error occurs.
+     * Zeigt den aktuellen Schichtplan in einer Tabelle an.
      */
+    private void showScheduleTable() {
+        if (calendar == null) {
+            showAlert("Error", "No schedule available.", Alert.AlertType.ERROR);
+            return;
+        }
+
+        Stage stage = new Stage();
+        stage.setTitle("Current Schedule");
+
+        TableView<Map<String, String>> table = new TableView<>();
+
+        // Spalten erstellen
+        TableColumn<Map<String, String>, String> dateColumn = new TableColumn<>("Date");
+        dateColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get("date")));
+
+        TableColumn<Map<String, String>, String> morningColumn = new TableColumn<>("Morning");
+        morningColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get("morning")));
+
+        TableColumn<Map<String, String>, String> afternoonColumn = new TableColumn<>("Afternoon");
+        afternoonColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().get("afternoon")));
+
+        table.getColumns().addAll(dateColumn, morningColumn, afternoonColumn);
+
+        // Daten hinzufügen
+        ObservableList<Map<String, String>> items = FXCollections.observableArrayList();
+        // Hier müssen die Daten aus dem calendar-Objekt geholt und in die TableView eingefügt werden
+
+        VBox vbox = new VBox(10);
+        vbox.getChildren().add(table);
+        vbox.setPadding(new Insets(10));
+
+        Scene scene = new Scene(vbox, 600, 400);
+        stage.setScene(scene);
+        stage.show();
+    }
+
     @Override
     public void stop() throws Exception {
         super.stop();

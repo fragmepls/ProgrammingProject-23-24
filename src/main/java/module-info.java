@@ -3,6 +3,7 @@ module it.scheduleplanner {
     requires javafx.fxml;
     requires java.sql;
     requires com.fasterxml.jackson.databind;
+    requires jdk.security.jgss;
 
     exports it.scheduleplanner.planner;
     exports it.scheduleplanner.dbutils;

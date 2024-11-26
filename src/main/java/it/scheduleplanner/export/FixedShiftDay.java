@@ -10,7 +10,7 @@ import it.scheduleplanner.utils.Employee;
  */
 public class FixedShiftDay implements ShiftDayInterface {
 
-    private Map<Employee, Shift> employees = new HashMap<>();
+    private final Map<Employee, Shift> employees = new HashMap<>();
 
     /**
      * Basic constructor for FixedShiftDay
@@ -26,6 +26,21 @@ public class FixedShiftDay implements ShiftDayInterface {
             shift = Shift.MORNING;
         }
         employees.put(employee, shift);
+    }
+
+    @Override
+    public void removeEmployee(Employee employee) {
+
+    }
+
+    @Override
+    public Shift getEmployeeShift(Employee employee) {
+        return null;
+    }
+
+    @Override
+    public boolean hasEmployee(Employee employee) {
+        return false;
     }
 
     @Override

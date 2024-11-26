@@ -15,9 +15,15 @@ public interface ShiftDayInterface {
      * In case as shift Shift.HALF got accidentally selected, it will be converted into Shift.MORNING to ensure the exportability of the resulting day and therefore also schedule.
      *
      * @param employee to be added to the Work Day
-     * @param shift To select from enum Shift, determines the shift
+     * @param shift    To select from enum Shift, determines the shift
      */
     public void addEmployee(Employee employee, Shift shift);
+
+    public void removeEmployee(Employee employee);
+
+    Shift getEmployeeShift(Employee employee);
+
+    boolean hasEmployee(Employee employee);
 
     /**
      * @return HashMap: Employees mapped to Shifts
