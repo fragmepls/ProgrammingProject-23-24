@@ -29,9 +29,13 @@ public class ScheduleCreator {
     }
 
     public static int idCreator() {
-        int employeeID = employeeSet.size();
-        employeeSetByID.add(employeeID);
-        return employeeID;
+        // Find the lowest available ID starting from 0
+        int id = 0;
+        while (employeeSetByID.contains(id)) {
+            id++;
+        }
+        employeeSetByID.add(id);
+        return id;
     }
 
 

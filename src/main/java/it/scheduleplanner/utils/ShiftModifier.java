@@ -8,9 +8,6 @@ import java.util.Map;
 
 public class ShiftModifier {
 
-    /**
-     * Modifies an existing shift assignment for an employee
-     */
     public static boolean modifyShift(ShiftScheduleInterface calendar,
                                       LocalDate date,
                                       Employee employee,
@@ -18,64 +15,58 @@ public class ShiftModifier {
         try {
             ShiftDayInterface day = calendar.getDay(date);
             if (day == null) {
+                System.err.println("Day not found in calendar");
                 return false;
             }
 
-            // Determine current shift
-            Map<Employee, Shift> currentAssignments = day.getEmployees();
-            Shift currentShift = currentAssignments.get(employee);
-
-            if (currentShift != null) {
-                // Return existing shift hours
-                adjustWorkingHours(employee, currentShift, true);
+            // If we're deleting the shift (newShift is null)
+            if (newShift == null) {
+                // Just remove the employee and let MockShiftDay handle hour restoration
+                day.removeEmployee(employee);
+                return true;
             }
 
-            // Assign new shift
-            day.addEmployee(employee, newShift);
-            // Subtract new shift hours
-            adjustWorkingHours(employee, newShift, false);
+            // Check if employee has enough hours for the new shift
+            if (!isModificationAllowed(employee, newShift)) {
+                System.err.println("Employee doesn't have enough hours for shift");
+                return false;
+            }
 
+            // Let MockShiftDay handle hour calculations
+            day.addEmployee(employee, newShift);
             return true;
+
         } catch (Exception e) {
             System.err.println("Error modifying shift: " + e.getMessage());
             return false;
         }
     }
 
-    /**
-     * Swaps shifts between two employees
-     */
     public static boolean swapShifts(ShiftScheduleInterface calendar,
                                      LocalDate date,
                                      Employee employee1,
                                      Employee employee2) {
         try {
             ShiftDayInterface day = calendar.getDay(date);
-            if (day == null) {
-                return false;
-            }
+            if (day == null) return false;
 
             Map<Employee, Shift> assignments = day.getEmployees();
             Shift shift1 = assignments.get(employee1);
             Shift shift2 = assignments.get(employee2);
 
-            // Remove both shifts (new assignment will override old ones)
-            if (shift1 != null) {
-                adjustWorkingHours(employee1, shift1, true);
-            }
-            if (shift2 != null) {
-                adjustWorkingHours(employee2, shift2, true);
-            }
+            if (shift1 == null || shift2 == null) return false;
 
-            // Assign new shifts
-            if (shift1 != null) {
-                day.addEmployee(employee2, shift1);
-                adjustWorkingHours(employee2, shift1, false);
-            }
-            if (shift2 != null) {
-                day.addEmployee(employee1, shift2);
-                adjustWorkingHours(employee1, shift2, false);
-            }
+            // Store shifts
+            Shift tempShift1 = shift1;
+            Shift tempShift2 = shift2;
+
+            // Remove both employees first
+            day.removeEmployee(employee1);
+            day.removeEmployee(employee2);
+
+            // Add them back with swapped shifts
+            day.addEmployee(employee1, tempShift2);
+            day.addEmployee(employee2, tempShift1);
 
             return true;
         } catch (Exception e) {
@@ -84,37 +75,24 @@ public class ShiftModifier {
         }
     }
 
-    /**
-     * Adjust the working hours of the employee
-     */
-    private static void adjustWorkingHours(Employee employee, Shift shift, boolean isAdding) {
-        int hours;
-        switch (shift) {
-            case FULL:
-                hours = 8;
-                break;
-            case MORNING:
-            case AFTERNOON:
-            case HALF:  // HALF is treated like MORNING( see FixedShiftDay)
-                hours = 4;
-                break;
-            default:
-                hours = 0;
-                break;
-        }
+    public static boolean isModificationAllowed(Employee employee, Shift newShift) {
+        if (newShift == null) return true;  // Deletion is always allowed
 
-        if (isAdding) {
-            employee.setWorkingHours(employee.getWorkingHours() + hours);
-        } else {
-            employee.setWorkingHours(employee.getWorkingHours() - hours);
-        }
+        int requiredHours = getShiftHours(newShift);
+        return employee.getWorkingHours() >= requiredHours;
     }
 
-    /**
-     * Checks if a shift modification is allowed
-     */
-    public static boolean isModificationAllowed(Employee employee, Shift newShift) {
-        int requiredHours = newShift == Shift.FULL ? 8 : 4;
-        return employee.getWorkingHours() >= requiredHours;
+    private static int getShiftHours(Shift shift) {
+        if (shift == null) return 0;
+        switch (shift) {
+            case FULL:
+                return 8;
+            case MORNING:
+            case AFTERNOON:
+            case HALF:
+                return 4;
+            default:
+                return 0;
+        }
     }
 }
