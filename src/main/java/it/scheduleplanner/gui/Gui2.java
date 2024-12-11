@@ -753,7 +753,7 @@ public class Gui2 extends Application {
     }
 
     /**
-     * Zeigt den aktuellen Schichtplan in einer Tabelle an.
+     * Displays the actual schedule in table format.
      */
     private void showScheduleTable() {
         if (calendar == null) {
