@@ -123,31 +123,30 @@ in the Welcome Tab of our Graphical User Interface.
 With the help of the other project-members I worked on the two central methods of the project which are part of the "
 EmployeeComparator" and the "ScheduleCreator" classes.
 
-- **ShiftModifier**
+ **ShiftModifier**
 
-- **Overview**
+ **Overview**
 
 
 The ShiftModifier class is a utility class responsible for managing and modifying shift assignments in a scheduling system. It provides functionality to modify individual shifts and swap shifts between employees while maintaining accurate working hour records.
 
-- **Main Functionalities**
+ **Main Functionalities**
 
 
-### Shift Modification
+ **Shift Modification**
 
 -   **Shift Assignment Changes**: Allows modification of existing shift assignments for individual employees
 -   **Working Hours Tracking**: Automatically adjusts employee working hours when shifts are modified
 -   **Validation**: Includes checks to ensure modifications are allowed based on employee working hours
 
-### Shift Swapping
+**Shift Swapping**
 
 -   **Employee Shift Exchange**: Facilitates the swapping of shifts between two employees
 -   **Automatic Hour Adjustment**: Manages working hour calculations for both employees involved in the swap
 -   **Validation**: Ensures both employees' shifts exist before attempting a swap
 -   **Transaction Safety**: Handles the swap operation atomically to maintain data consistency
 
-Integration
------------
+**Integration**
 
 This class works in conjunction with:
 
