@@ -133,20 +133,20 @@ The ShiftModifier class is a utility class responsible for managing and modifyin
  **Main Functionalities**
 
 
- **Shift Modification**
+ Shift Modification
 
 -   **Shift Assignment Changes**: Allows modification of existing shift assignments for individual employees
 -   **Working Hours Tracking**: Automatically adjusts employee working hours when shifts are modified
 -   **Validation**: Includes checks to ensure modifications are allowed based on employee working hours
 
-**Shift Swapping**
+Shift Swapping
 
 -   **Employee Shift Exchange**: Facilitates the swapping of shifts between two employees
 -   **Automatic Hour Adjustment**: Manages working hour calculations for both employees involved in the swap
 -   **Validation**: Ensures both employees' shifts exist before attempting a swap
 -   **Transaction Safety**: Handles the swap operation atomically to maintain data consistency
 
-**Integration**
+Integration
 
 This class works in conjunction with:
 
