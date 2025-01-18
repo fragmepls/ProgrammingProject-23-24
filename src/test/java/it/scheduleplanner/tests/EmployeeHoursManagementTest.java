@@ -42,8 +42,8 @@ class EmployeeHoursManagementTest {
     }
 
     @Test
-    @DisplayName("Should track missing hours after shift deletion")
-    void testTrackMissingHours() {
+    @DisplayName("Should track hours after shift assignment and deletion")
+    void testTrackHours() {
         Employee employee = employees.get(0);
         int initialHours = employee.getWorkingHours();
 
@@ -59,107 +59,43 @@ class EmployeeHoursManagementTest {
     }
 
     @Test
-    @DisplayName("Should find suitable replacement for shift")
-    void testFindBestReplacementForShift() {
-        Employee originalEmployee = employees.get(0);
-        Employee potentialReplacement = employees.get(1);
-
-        // Setup conditions
-        originalEmployee.setWorkingHours(4); // Too few hours
-        potentialReplacement.setWorkingHours(40); // Sufficient hours
-
-        Employee replacement = findBestReplacement(employees, Shift.FULL, testDate);
-
-        assertNotNull(replacement, "Should find a replacement");
-        assertNotEquals(originalEmployee, replacement,
-                "Replacement should not be the original employee");
-        assertTrue(replacement.getWorkingHours() >= 8,
-                "Replacement should have sufficient hours");
-    }
-
-    @Test
-    @DisplayName("Should optimize schedule after deletion")
-    void testOptimizeScheduleAfterDeletion() {
+    @DisplayName("Should verify hours deduction for different shift types")
+    void testHoursDeductionByShiftType() {
         Employee employee = employees.get(0);
         int initialHours = employee.getWorkingHours();
 
-        // Add full shift
-        mockCalendar.getDay(testDate).addEmployee(employee, Shift.FULL);
-        assertEquals(initialHours - 8, employee.getWorkingHours(),
-                "Hours should be deducted after adding shift");
+        System.out.println("Initial hours: " + initialHours);  // Debug
 
-        // Remove shift
-        mockCalendar.getDay(testDate).removeEmployee(employee);
-        assertEquals(initialHours, employee.getWorkingHours(),
-                "Hours should be restored after optimization");
+        // Test full shift
+        mockCalendar.getDay(testDate).addEmployee(employee, Shift.FULL);
+        System.out.println("Hours after full shift: " + employee.getWorkingHours());  // Debug
+        assertEquals(initialHours - 8, employee.getWorkingHours(),
+                "Full shift should deduct 8 hours");
+
+        // Reset hours
+        employee.setWorkingHours(initialHours);
+        System.out.println("Hours after reset: " + employee.getWorkingHours());  // Debug
+
+        // Test morning shift
+        mockCalendar.getDay(testDate).addEmployee(employee, Shift.MORNING);
+        System.out.println("Hours after morning shift: " + employee.getWorkingHours());  // Debug
+        assertEquals(initialHours - 4, employee.getWorkingHours(),
+                "Morning shift should deduct 4 hours");
     }
 
     @Test
-    @DisplayName("Should balance hours across employees")
-    void testBalanceHoursAcrossEmployees() {
-        Employee fullTimeEmp = employees.get(0);
-        Employee partTimeEmp = employees.get(2);
+    @DisplayName("Should handle insufficient hours for shift assignment")
+    void testInsufficientHours() {
+        Employee employee = employees.get(0);
 
-        // Set up unbalanced hours
-        fullTimeEmp.setWorkingHours(30); // Under hours for full-time
-        partTimeEmp.setWorkingHours(25); // Over hours for part-time
+        // Set hours too low for full shift
+        employee.setWorkingHours(7);
 
-        balanceHours(employees);
+        // Attempt to assign full shift
+        mockCalendar.getDay(testDate).addEmployee(employee, Shift.FULL);
 
-        int fullTimeHours = fullTimeEmp.getWorkingHours();
-        int partTimeHours = partTimeEmp.getWorkingHours();
-
-        assertTrue(fullTimeHours > 30,
-                "Full-time employee hours should be increased: " + fullTimeHours);
-        assertTrue(partTimeHours <= 20,
-                "Part-time employee hours should be decreased: " + partTimeHours);
-    }
-
-    // Helper method to find best replacement
-    private Employee findBestReplacement(List<Employee> employees, Shift shift, LocalDate date) {
-        int requiredHours = (shift == Shift.FULL) ? 8 : 4;
-
-        return employees.stream()
-                .filter(e -> e.getWorkingHours() >= requiredHours)
-                .filter(e -> !e.isOnVacation(date))
-                .min(Comparator.comparingInt(Employee::getOverTimeHours))
-                .orElse(null);
-    }
-
-    // Helper method to balance hours
-    private void balanceHours(List<Employee> employees) {
-        Map<Employee, Integer> targetHours = new HashMap<>();
-        for (Employee emp : employees) {
-            targetHours.put(emp, emp.isFullTimeWorker() ? 40 : 20);
-        }
-
-        boolean balanced;
-        do {
-            balanced = true;
-            for (Employee emp : employees) {
-                int current = emp.getWorkingHours();
-                int target = targetHours.get(emp);
-
-                if (current < target) {
-                    // Find donor with excess hours
-                    Optional<Employee> donor = employees.stream()
-                            .filter(other -> other != emp)
-                            .filter(other -> other.getWorkingHours() > targetHours.get(other))
-                            .findFirst();
-
-                    if (donor.isPresent()) {
-                        Employee d = donor.get();
-                        int transfer = Math.min(4, Math.min(target - current,
-                                d.getWorkingHours() - targetHours.get(d)));
-
-                        if (transfer > 0) {
-                            d.setWorkingHours(d.getWorkingHours() - transfer);
-                            emp.setWorkingHours(emp.getWorkingHours() + transfer);
-                            balanced = false;
-                        }
-                    }
-                }
-            }
-        } while (!balanced);
+        // Verify employee wasn't assigned
+        assertFalse(mockCalendar.getDay(testDate).hasEmployee(employee),
+                "Employee should not be assigned with insufficient hours");
     }
 }
