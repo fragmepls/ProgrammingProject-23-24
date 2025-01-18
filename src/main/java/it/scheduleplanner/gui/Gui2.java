@@ -513,7 +513,6 @@ public class Gui2 extends Application {
             showAlert("Error", "Failed to export schedule.", Alert.AlertType.ERROR);
         }
     }
-
     private Tab createShiftModificationTab() {
         System.out.println("Creating shift modification tab...");
         Tab tab = new Tab("Modify Shifts");
@@ -542,6 +541,10 @@ public class Gui2 extends Application {
         modifyButton.setOnAction(e -> handleModifyShift(datePicker, employeeComboBox,
                 shiftComboBox, viewCurrentButton));
 
+        // Neuer Delete Button
+        Button deleteShiftButton = new Button("Delete Shift");
+        deleteShiftButton.setOnAction(e -> handleDeleteShift(datePicker, employeeComboBox, viewCurrentButton));
+
         // Shift swap section
         Label swapLabel = new Label("Swap Shifts Between Employees");
         swapLabel.setStyle("-fx-font-weight: bold; -fx-padding: 10 0 5 0;");
@@ -564,6 +567,7 @@ public class Gui2 extends Application {
                 employeeComboBox,
                 shiftComboBox,
                 modifyButton,
+                deleteShiftButton,  // Neuer Button
                 new Separator(),
                 swapLabel,
                 new Label("First Employee:"), employee1ComboBox,
@@ -575,30 +579,6 @@ public class Gui2 extends Application {
         scrollPane.setFitToWidth(true);
         tab.setContent(scrollPane);
         return tab;
-    }
-
-    private boolean hasRequiredCoverage(ShiftDayInterface day, int requiredEmployees) {
-        Map<Employee, Shift> assignments = day.getEmployees();
-        int morningCount = 0;
-        int afternoonCount = 0;
-
-        // Count employees for each time slot
-        for (Shift shift : assignments.values()) {
-            switch (shift) {
-                case MORNING:
-                    morningCount++;
-                    break;
-                case AFTERNOON:
-                    afternoonCount++;
-                    break;
-                case FULL:
-                    morningCount++;
-                    afternoonCount++;
-                    break;
-            }
-        }
-
-        return morningCount >= requiredEmployees && afternoonCount >= requiredEmployees;
     }
 
     private void handleViewCurrentSchedule(DatePicker datePicker, TextArea currentScheduleArea) {
@@ -685,6 +665,58 @@ public class Gui2 extends Application {
         }
     }
 
+    private void handleDeleteShift(DatePicker datePicker, ComboBox<Employee> employeeComboBox, Button viewCurrentButton) {
+        LocalDate date = datePicker.getValue();
+        Employee employee = employeeComboBox.getValue();
+
+        if (date == null || employee == null) {
+            showAlert("Input Error", "Please select date and employee.", Alert.AlertType.ERROR);
+            return;
+        }
+
+        if (calendar == null) {
+            showAlert("Error", "No schedule available.", Alert.AlertType.ERROR);
+            return;
+        }
+
+        try {
+            // Create a temporary copy of the day to check coverage
+            ShiftDayInterface currentDay = calendar.getDay(date);
+            ShiftDayInterface tempDay = new FixedShiftDay();
+
+            // Copy all assignments except the one being deleted
+            for (Map.Entry<Employee, Shift> entry : currentDay.getEmployees().entrySet()) {
+                if (!entry.getKey().equals(employee)) {
+                    tempDay.addEmployee(entry.getKey(), entry.getValue());
+                }
+            }
+
+            // Check if this would result in insufficient coverage
+            if (!hasRequiredCoverage(tempDay, 2)) { // 2 ist die Mindestanzahl an Mitarbeitern
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Insufficient Coverage Warning");
+                confirm.setHeaderText("Warning: Deleting this shift will result in insufficient coverage");
+                confirm.setContentText("This deletion will result in some time slots having fewer employees than required. Do you want to proceed?");
+
+                Optional<ButtonType> result = confirm.showAndWait();
+                if (result.isEmpty() || result.get() != ButtonType.OK) {
+                    return;
+                }
+            }
+
+            // Proceed with deletion
+            if (ShiftModifier.modifyShift(calendar, date, employee, null)) {
+                showAlert("Success", "Shift deleted successfully.", Alert.AlertType.INFORMATION);
+                viewCurrentButton.fire(); // Aktualisiere die Anzeige
+                updateScheduleDisplay();
+            } else {
+                showAlert("Error", "Failed to delete shift.", Alert.AlertType.ERROR);
+            }
+        } catch (Exception ex) {
+            showAlert("Error", "An error occurred: " + ex.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
     private void handleSwapShifts(DatePicker datePicker,
                                   ComboBox<Employee> employee1ComboBox,
                                   ComboBox<Employee> employee2ComboBox,
@@ -714,6 +746,30 @@ public class Gui2 extends Application {
         } catch (Exception ex) {
             showAlert("Error", "An error occurred: " + ex.getMessage(), Alert.AlertType.ERROR);
         }
+    }
+
+    private boolean hasRequiredCoverage(ShiftDayInterface day, int requiredEmployees) {
+        Map<Employee, Shift> assignments = day.getEmployees();
+        int morningCount = 0;
+        int afternoonCount = 0;
+
+        // Count employees for each time slot
+        for (Shift shift : assignments.values()) {
+            switch (shift) {
+                case MORNING:
+                    morningCount++;
+                    break;
+                case AFTERNOON:
+                    afternoonCount++;
+                    break;
+                case FULL:
+                    morningCount++;
+                    afternoonCount++;
+                    break;
+            }
+        }
+
+        return morningCount >= requiredEmployees && afternoonCount >= requiredEmployees;
     }
 
     private void updateScheduleDisplay() {

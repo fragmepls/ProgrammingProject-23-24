@@ -30,7 +30,7 @@ public class FixedShiftDay implements ShiftDayInterface {
 
     @Override
     public void removeEmployee(Employee employee) {
-
+        employees.remove(employee);
     }
 
     @Override
