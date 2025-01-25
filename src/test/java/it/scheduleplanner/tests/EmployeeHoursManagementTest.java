@@ -64,21 +64,17 @@ class EmployeeHoursManagementTest {
         Employee employee = employees.get(0);
         int initialHours = employee.getWorkingHours();
 
-        System.out.println("Initial hours: " + initialHours);  // Debug
-
         // Test full shift
         mockCalendar.getDay(testDate).addEmployee(employee, Shift.FULL);
-        System.out.println("Hours after full shift: " + employee.getWorkingHours());  // Debug
         assertEquals(initialHours - 8, employee.getWorkingHours(),
                 "Full shift should deduct 8 hours");
 
-        // Reset hours
+        // Remove previous shift and reset hours
+        mockCalendar.getDay(testDate).removeEmployee(employee);
         employee.setWorkingHours(initialHours);
-        System.out.println("Hours after reset: " + employee.getWorkingHours());  // Debug
 
         // Test morning shift
         mockCalendar.getDay(testDate).addEmployee(employee, Shift.MORNING);
-        System.out.println("Hours after morning shift: " + employee.getWorkingHours());  // Debug
         assertEquals(initialHours - 4, employee.getWorkingHours(),
                 "Morning shift should deduct 4 hours");
     }
