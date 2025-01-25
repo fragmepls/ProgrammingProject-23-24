@@ -513,6 +513,10 @@ public class Gui2 extends Application {
             showAlert("Error", "Failed to export schedule.", Alert.AlertType.ERROR);
         }
     }
+    /**
+     * Creates the shift modification tab in the GUI.
+     * This tab allows users to view, modify, delete, and swap shifts.
+     */
     private Tab createShiftModificationTab() {
         System.out.println("Creating shift modification tab...");
         Tab tab = new Tab("Modify Shifts");
@@ -521,19 +525,24 @@ public class Gui2 extends Application {
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10));
 
+        // Date selection component
         DatePicker datePicker = new DatePicker();
         datePicker.setPromptText("Select Date");
 
+        // Employee selection dropdown
         ComboBox<Employee> employeeComboBox = new ComboBox<>(employeeList);
         setupEmployeeComboBox(employeeComboBox);
 
+        // Shift type selection
         ComboBox<Shift> shiftComboBox = new ComboBox<>();
         shiftComboBox.getItems().addAll(Shift.MORNING, Shift.AFTERNOON, Shift.FULL);
 
+        // Schedule display area
         TextArea currentScheduleArea = new TextArea();
         currentScheduleArea.setEditable(false);
         currentScheduleArea.setPrefRowCount(5);
 
+        // Action buttons
         Button viewCurrentButton = new Button("View Current Schedule");
         viewCurrentButton.setOnAction(e -> handleViewCurrentSchedule(datePicker, currentScheduleArea));
 
@@ -541,7 +550,7 @@ public class Gui2 extends Application {
         modifyButton.setOnAction(e -> handleModifyShift(datePicker, employeeComboBox,
                 shiftComboBox, viewCurrentButton));
 
-        // Neuer Delete Button
+        // Delete shift button
         Button deleteShiftButton = new Button("Delete Shift");
         deleteShiftButton.setOnAction(e -> handleDeleteShift(datePicker, employeeComboBox, viewCurrentButton));
 
@@ -567,7 +576,7 @@ public class Gui2 extends Application {
                 employeeComboBox,
                 shiftComboBox,
                 modifyButton,
-                deleteShiftButton,  // Neuer Button
+                deleteShiftButton,
                 new Separator(),
                 swapLabel,
                 new Label("First Employee:"), employee1ComboBox,
@@ -581,6 +590,10 @@ public class Gui2 extends Application {
         return tab;
     }
 
+    /**
+     * Displays the current schedule for the selected date.
+     * Shows all employee assignments and their shifts.
+     */
     private void handleViewCurrentSchedule(DatePicker datePicker, TextArea currentScheduleArea) {
         if (calendar == null || datePicker.getValue() == null) {
             showAlert("Error", "Please select a date and ensure a schedule exists.",
@@ -602,6 +615,10 @@ public class Gui2 extends Application {
         currentScheduleArea.setText(schedule.toString());
     }
 
+    /**
+     * Handles modification of employee shifts.
+     * Includes validation and coverage checking.
+     */
     private void handleModifyShift(DatePicker datePicker,
                                    ComboBox<Employee> employeeComboBox,
                                    ComboBox<Shift> shiftComboBox,
@@ -610,6 +627,7 @@ public class Gui2 extends Application {
         Employee employee = employeeComboBox.getValue();
         Shift newShift = shiftComboBox.getValue();
 
+        // Validate inputs
         if (date == null || employee == null || newShift == null) {
             showAlert("Input Error", "Please select date, employee, and shift.", Alert.AlertType.ERROR);
             return;
@@ -620,27 +638,27 @@ public class Gui2 extends Application {
             return;
         }
 
+        // Check if employee has enough hours
         if (!ShiftModifier.isModificationAllowed(employee, newShift)) {
             showAlert("Error", "Employee doesn't have enough working hours.", Alert.AlertType.ERROR);
             return;
         }
 
         try {
-            // Create a temporary copy of the day to check coverage
+            // Create temporary schedule to check coverage
             ShiftDayInterface currentDay = calendar.getDay(date);
             ShiftDayInterface tempDay = new FixedShiftDay();
 
-            // Copy all assignments except the one being modified
+            // Copy existing assignments except modified one
             for (Map.Entry<Employee, Shift> entry : currentDay.getEmployees().entrySet()) {
                 if (!entry.getKey().equals(employee)) {
                     tempDay.addEmployee(entry.getKey(), entry.getValue());
                 }
             }
-            // Add the new shift
             tempDay.addEmployee(employee, newShift);
 
-            // Check if this would result in insufficient coverage
-            if (!hasRequiredCoverage(tempDay, 2)) { // Replace 2 with your required number of employees
+            // Check coverage requirements
+            if (!hasRequiredCoverage(tempDay, 2)) {
                 Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
                 confirm.setTitle("Insufficient Coverage");
                 confirm.setHeaderText("Warning: Shift Change Will Result in Insufficient Coverage");
@@ -652,7 +670,7 @@ public class Gui2 extends Application {
                 }
             }
 
-            // Proceed with modification
+            // Perform modification
             if (ShiftModifier.modifyShift(calendar, date, employee, newShift)) {
                 showAlert("Success", "Shift modified successfully.", Alert.AlertType.INFORMATION);
                 viewCurrentButton.fire();
@@ -665,6 +683,10 @@ public class Gui2 extends Application {
         }
     }
 
+    /**
+     * Handles deletion of employee shifts.
+     * Includes coverage checking and confirmation.
+     */
     private void handleDeleteShift(DatePicker datePicker, ComboBox<Employee> employeeComboBox, Button viewCurrentButton) {
         LocalDate date = datePicker.getValue();
         Employee employee = employeeComboBox.getValue();
@@ -680,19 +702,17 @@ public class Gui2 extends Application {
         }
 
         try {
-            // Create a temporary copy of the day to check coverage
+            // Check coverage after deletion
             ShiftDayInterface currentDay = calendar.getDay(date);
             ShiftDayInterface tempDay = new FixedShiftDay();
 
-            // Copy all assignments except the one being deleted
             for (Map.Entry<Employee, Shift> entry : currentDay.getEmployees().entrySet()) {
                 if (!entry.getKey().equals(employee)) {
                     tempDay.addEmployee(entry.getKey(), entry.getValue());
                 }
             }
 
-            // Check if this would result in insufficient coverage
-            if (!hasRequiredCoverage(tempDay, 2)) { // 2 ist die Mindestanzahl an Mitarbeitern
+            if (!hasRequiredCoverage(tempDay, 2)) {
                 Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
                 confirm.setTitle("Insufficient Coverage Warning");
                 confirm.setHeaderText("Warning: Deleting this shift will result in insufficient coverage");
@@ -704,10 +724,10 @@ public class Gui2 extends Application {
                 }
             }
 
-            // Proceed with deletion
+            // Perform deletion
             if (ShiftModifier.modifyShift(calendar, date, employee, null)) {
                 showAlert("Success", "Shift deleted successfully.", Alert.AlertType.INFORMATION);
-                viewCurrentButton.fire(); // Aktualisiere die Anzeige
+                viewCurrentButton.fire();
                 updateScheduleDisplay();
             } else {
                 showAlert("Error", "Failed to delete shift.", Alert.AlertType.ERROR);
@@ -717,6 +737,9 @@ public class Gui2 extends Application {
         }
     }
 
+    /**
+     * Handles swapping shifts between two employees.
+     */
     private void handleSwapShifts(DatePicker datePicker,
                                   ComboBox<Employee> employee1ComboBox,
                                   ComboBox<Employee> employee2ComboBox,
@@ -748,12 +771,18 @@ public class Gui2 extends Application {
         }
     }
 
+    /**
+     * Checks if a day has sufficient employee coverage for all time slots.
+     * @param day The day to check
+     * @param requiredEmployees Minimum number of employees needed per slot
+     * @return true if coverage requirements are met
+     */
     private boolean hasRequiredCoverage(ShiftDayInterface day, int requiredEmployees) {
         Map<Employee, Shift> assignments = day.getEmployees();
         int morningCount = 0;
         int afternoonCount = 0;
 
-        // Count employees for each time slot
+        // Count employees in each time slot
         for (Shift shift : assignments.values()) {
             switch (shift) {
                 case MORNING:
@@ -772,12 +801,14 @@ public class Gui2 extends Application {
         return morningCount >= requiredEmployees && afternoonCount >= requiredEmployees;
     }
 
+    /**
+     * Updates the schedule display by exporting current state.
+     */
     private void updateScheduleDisplay() {
         if (outputDirectory != null && calendar != null) {
             exportSchedule(calendar);
         }
     }
-
     private void handleImportEmployees() {
         try {
             employeeList.addAll(SQLQueries.selectAllEmployees(connection));
